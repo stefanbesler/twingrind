@@ -14,7 +14,10 @@ Currently this is work in progress, but the general idea is as follows
 
 The profile can then be visualized by qcachegrind.
 
-# adding profiler to a plc
+# using the profiler in your plc
+
+## add library
+wip
 
 ## generate profiling guards
 use the script profiler_guards.py to add guards to all methods in your plc
@@ -24,7 +27,16 @@ python profiler_guards.py -d <PATH_TO_PLC> -a add
 ```
 the script transverses through the entire code base of the plc located at the given directory. For all methods and it adds a header function call and a footer function call to the profiler library.
 
+## make callstack snapshot
+wip
+
+## generate callgrind file
+wip
+
 # removing profiler from a plc
+
+## add library
+wip
 
 ## removing profiling guards
 use the script profiler_guards.py to remove guards to all methods in your plc
