@@ -44,14 +44,14 @@ try:
     time.sleep(1)
 
     logging.debug('reading measurement')
-    nstack = plc.read_by_name('Global.profiler.nstack', False, pyads.dint)
+    nstack = plc.read_by_name('Global.profiler.nstack', pyads.dint)
 
     # define a new stack class that can contain as many calls as were
     # actually performed - yes, we can do that with python :)
     class Stack(ctypes.Structure):
         _fields_ = [("calls", ctypes.c_float * nstack)]
 
-    stack = plc.read_by_name('Global.profiler.stack', False, Stack)
+    stack = plc.read_by_name('Global.profiler.stack', Stack)
 
     logging.debug('store measurement')
     pickle.dump(stack, open(os.path.join(dest, "callstack_{}".format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))), "wb"))
