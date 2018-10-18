@@ -31,7 +31,6 @@ def find_files(filepath):
 
 def add_guards(filepath, fb):
     """add guards to fb and all methods for this file"""
-    global tag
 
     with open(filepath, "rt") as f:
         src = f.read()
@@ -53,7 +52,6 @@ def add_guards(filepath, fb):
 
 def remove_guards(filepath, fb):
     """remove guards to fb and all methods for this file"""
-    global tag
 
     with open(filepath, "rt") as f:
         src = f.read()
