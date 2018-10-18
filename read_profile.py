@@ -20,11 +20,11 @@ class Call(ctypes.Structure):
 parser = ArgumentParser("""triggers the measurement of a single profile and
 stores the corresponding callstack on disk""")
 
-parser.add_argument("-n", "--netid", help="netid of the target machine", required=False)
-parser.add_argument("-p", "--port", help="port of the plc", default=851, required=False)
-parser.add_argument("-d", "--dest", help="output directory ", default="./", required=False)
-parser.add_argument("-n", "--notrigger", help="if set, the script won't trigger, but simply"\
-                    "read the last available data from the plc", action="store_true")
+parser.add_argument("-n", "--netid", help="netid of the target machine")
+parser.add_argument("-p", "--port", help="port of the plc", default=851)
+parser.add_argument("-d", "--dest", help="output directory ", default="./")
+parser.add_argument("-n", "--notrigger", help="if set, the script won't trigger, but simply read old data", action="store_true")
+parser.add_argument("-m", "--depth", help="maximum recorded callstack depth, 0 means no limit", default=0)
 args = vars(parser.parse_args())
 
 logging.basicConfig(level=logging.DEBUG)
@@ -32,6 +32,7 @@ netid = args['netid']
 port = args['port']
 dest = args['dest']
 trigger = not args['notrigger']
+depth = args['depth']
 
 try:
     logging.debug('connecting {}:{}'.format(netid, port))
@@ -41,6 +42,8 @@ try:
 
     if trigger:
         logging.debug('trigger measurement')
+        plc.write_by_name('Global.profiler.depthLimit', depth, pyads.int)
+        time.sleep(1)
         plc.write_by_name('Global.profiler.disabled', False, pyads.bool)
 
     # wait (we dont really have to since 1 ads call should take at least
