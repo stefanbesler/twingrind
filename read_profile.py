@@ -7,15 +7,7 @@ from argparse import ArgumentParser
 import pyads
 import ctypes
 import pickle
-
-class Call(ctypes.Structure):
-    _fields_ = [("fb_name", ctypes.c_byte * 81),
-                ("method_name", ctypes.c_byte * 81),
-                ("depth", ctypes.c_int),
-                ("startlo", ctypes.c_int),
-                ("starthi", ctypes.c_int),
-                ("endlo", ctypes.c_int),
-                ("endhi", ctypes.c_int)]
+from plcstack import Call
 
 parser = ArgumentParser("""triggers the measurement of a single profile and
 stores the corresponding callstack on disk""")
@@ -23,42 +15,40 @@ stores the corresponding callstack on disk""")
 parser.add_argument("-n", "--netid", help="netid of the target machine")
 parser.add_argument("-p", "--port", help="port of the plc", default=851)
 parser.add_argument("-d", "--dest", help="output directory ", default="./")
-parser.add_argument("-n", "--notrigger", help="if set, the script won't trigger, but simply read old data", action="store_true")
-parser.add_argument("-m", "--depth", help="maximum recorded callstack depth, 0 means no limit", default=0)
+parser.add_argument("-r", "--notrigger", help="if set, the script won't trigger, but simply read old data", action="store_true")
 args = vars(parser.parse_args())
 
 logging.basicConfig(level=logging.DEBUG)
 netid = args['netid']
-port = args['port']
+port = int(args['port'])
 dest = args['dest']
 trigger = not args['notrigger']
-depth = args['depth']
 
+plc = pyads.Connection(netid, port)
 try:
     logging.debug('connecting {}:{}'.format(netid, port))
 
-    plc = pyads.Connection(netid, port)
     plc.open()
 
     if trigger:
         logging.debug('trigger measurement')
-        plc.write_by_name('Global.profiler.depthLimit', depth, pyads.int)
-        time.sleep(1)
-        plc.write_by_name('Global.profiler.disabled', False, pyads.bool)
+        plc.write_by_name('Global.profilerdata.enabled', True, pyads.PLCTYPE_BOOL)
 
-    # wait (we dont really have to since 1 ads call should take at least
-    # 1 cycle of the plc anyway, but lets be sure ...
-    time.sleep(1)
+        # wait (we dont really have to since 1 ads call should take at least
+        # 1 cycle of the plc anyway, but lets be sure ...
+        time.sleep(1)
 
     logging.debug('reading measurement')
-    nstack = plc.read_by_name('Global.profiler.nstack', pyads.dint)
+    stacksize = plc.read_by_name('Global.profilerdata.stacksize', pyads.PLCTYPE_DINT)
+
+    logging.debug('  -> {} methods were called'.format(int((stacksize-1)/2)))
 
     # define a new stack class that can contain as many calls as were
     # actually performed - yes, we can do that with python :)
     class Stack(ctypes.Structure):
-        _fields_ = [("calls", Call * nstack)]
+        _fields_ = [("calls", Call * stacksize)]
 
-    stack = plc.read_by_name('Global.profiler.stack', Stack)
+    stack = plc.read_by_name('Global.profilerdata.stack', Stack)
 
     logging.debug('store measurement')
     pickle.dump(stack, open(os.path.join(dest, "callstack_{}".format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))), "wb"))
