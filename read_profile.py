@@ -36,7 +36,7 @@ try:
 
         # wait (we dont really have to since 1 ads call should take at least
         # 1 cycle of the plc anyway, but lets be sure ...
-        time.sleep(1)
+        time.sleep(3)
 
     logging.debug('reading measurement')
     stacksize = plc.read_by_name('Global.profilerdata.stacksize', pyads.PLCTYPE_DINT)
@@ -46,7 +46,7 @@ try:
     # define a new stack class that can contain as many calls as were
     # actually performed - yes, we can do that with python :)
     class Stack(ctypes.Structure):
-        _fields_ = [("calls", Call * stacksize)]
+        _fields_ = [("calls", Call * (stacksize+1))]
 
     stack = plc.read_by_name('Global.profilerdata.stack', Stack)
 
