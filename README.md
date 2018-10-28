@@ -7,10 +7,10 @@ Also, we focus on profiles of 1 cycle rather than profiling over a given timespa
 
 Currently this is work in progress, but the general idea is as follows
 
-1. provide a simple profiler-library anyone can add to their application (not started)
+1. provide a simple profiler-library anyone can add to their application (ProfilerLib Twincat library)
 2. add function calls that are used for stack reconstruction for all methods in a given application. ( > profiler_guards.py )
 3. provide a script that triggers a profile measurement and then reads the callstack via ADS. The callstack is then stored on disk for later usage ( > read_profile.py )
-4. provide a script that reads a callstack (created by 3.) from disk and converts it to the callgrind profile format, version 1 (http://kcachegrind.sourceforge.net/html/CallgrindFormat.html)
+4. provide a script that reads a callstack (created by 3.) from disk and converts it to the callgrind profile format, version 1 (http://kcachegrind.sourceforge.net/html/CallgrindFormat.html) (reconstruct.py)
 
 The profile can then be visualized by qcachegrind.
 
