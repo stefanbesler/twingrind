@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="ProfilerStruct" Id="{3a54aec4-f6d2-4a6d-8cf6-eb326acc9240}">
+    <Declaration><![CDATA[TYPE ProfilerStruct :
+STRUCT
+  nstack : DINT;
+  stacksize : DINT;
+  stack : ARRAY[0..ProfilerParameterList.MAX_STACKSIZE] OF ProfilerStackStruct;
+  counter : GETCPUCOUNTER;
+  enabled : BOOL;
+  depth : DINT := 0;   
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="Profiler" Id="{4c312b8a-7c0e-487b-a95f-8d9579005e8d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FINAL Profiler
+VAR
+  dataRef_ : REFERENCE TO ProfilerStruct;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="FB_init" Id="{abdcc139-61a8-462f-af1e-9d0bfb7f826b}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+  data : REFERENCE TO ProfilerStruct;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[dataRef_ REF= data;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="popMethod" Id="{1b9090c0-51e1-4ee1-a2dc-e7ebb71eb6d6}">
+      <Declaration><![CDATA[METHOD popMethod
+VAR_INPUT
+  hash : UINT; 
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(dataRef_)
+THEN
+  RETURN;
+END_IF
+
+IF NOT dataRef_.enabled
+THEN
+  RETURN;
+END_IF
+
+dataRef_.depth := dataRef_.depth - 1;
+dataRef_.stack[dataRef_.nstack].depth := dataRef_.depth;
+dataRef_.stack[dataRef_.nstack].hash := hash;
+dataRef_.stack[dataRef_.nstack].starthi := 0;
+dataRef_.stack[dataRef_.nstack].startlo := 0;
+dataRef_.counter(cpuCntLoDW => dataRef_.stack[dataRef_.nstack].endlo, cpuCntHiDW => dataRef_.stack[dataRef_.nstack].endhi);
+
+IF dataRef_.depth = 0
+THEN
+  dataRef_.enabled := FALSE;
+  dataRef_.stacksize := dataRef_.nstack;
+  dataRef_.nstack := 0;
+ELSE
+  dataRef_.nstack := dataRef_.nstack + 1;  
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="pushMethod" Id="{73ade628-384d-4839-958b-b87e163eaa71}">
+      <Declaration><![CDATA[METHOD pushMethod : BOOL
+VAR_INPUT
+  hash : UINT;  
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(dataRef_)
+THEN
+  RETURN;
+END_IF
+
+IF NOT dataRef_.enabled
+THEN
+  RETURN;
+END_IF
+
+dataRef_.stack[dataRef_.nstack].depth := dataRef_.depth;
+dataRef_.stack[dataRef_.nstack].hash := hash;
+dataRef_.counter(cpuCntLoDW => dataRef_.stack[dataRef_.nstack].startlo, cpuCntHiDW => dataRef_.stack[dataRef_.nstack].starthi);
+dataRef_.stack[dataRef_.nstack].endhi := 0;
+dataRef_.stack[dataRef_.nstack].endlo := 0;
+dataRef_.nstack := dataRef_.nstack + 1;
+dataRef_.depth := dataRef_.depth + 1;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="Profiler">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="Profiler.FB_init">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="Profiler.popMethod">
+      <LineId Id="39" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="6" Count="3" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="17" Count="2" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="21" Count="2" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="Profiler.pushMethod">
+      <LineId Id="29" Count="2" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="6" Count="3" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
