@@ -8,6 +8,7 @@ import pickle
 import copy
 import datetime
 from argparse import ArgumentParser
+from plcstack import create_hash
 
 parser = ArgumentParser("""adds or removes guards to TwinCAT3 function blocks.
 These guards are used for profiling your program""")
@@ -32,20 +33,6 @@ def find_files(filepath):
             re_source = re.match(".*.tcpou$", f, re.I) 
             if re_source:
                 yield os.path.join(subdir, f)
-
-
-def create_hash(fb, method, hashes):
-
-    increment = 0
-
-    # todo find a better way to create a hash, if we ever exceed the 65000 we get into trouble
-    while True:
-        hstr = fb + "::" + method + str(increment)
-        h = hash(hstr) & 65535
-        if h not in hashes:
-            hashes[h] = (fb, method)
-            return h
-        increment += 1
 
 
 def add_guards(filepath, fb_name, hashes):
