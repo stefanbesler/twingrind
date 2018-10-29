@@ -1,5 +1,7 @@
 # tc3profiler
 
+![demo][demo1.png]
+
 For now, Beckhoff's Twincat 3 doesn't offer any profiling mechanism. The scripts, implemented within the scope of this repository, aim to add such functionality in a relative simple way.
 This project aims to add profiling of methods (of function blocks), rather than directly to function blocks. Coming from OOP we hardly use function blocks directly in our code base. 
 Also, we focus on profiles of 1 cycle rather than profiling over a given timespan. Profiling is restricted to 1 Task and 1 PRG and visualization is implemented via callgrind. http://kcachegrind.sourceforge.net/html/Home.html
