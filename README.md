@@ -1,6 +1,6 @@
 # tc3profiler
 
-![demo][demo1.png]
+![demo](demo1.png)
 
 For now, Beckhoff's Twincat 3 doesn't offer any profiling mechanism. The scripts, implemented within the scope of this repository, aim to add such functionality in a relative simple way.
 This project aims to add profiling of methods (of function blocks), rather than directly to function blocks. Coming from OOP we hardly use function blocks directly in our code base. 
