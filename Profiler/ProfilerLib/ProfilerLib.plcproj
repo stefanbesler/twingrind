@@ -48,11 +48,6 @@
     </PlaceholderReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ProfilerLib.tmc">
-      <SubType>Content</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Version" />
   </ItemGroup>
   <ProjectExtensions>
