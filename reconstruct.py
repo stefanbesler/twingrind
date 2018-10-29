@@ -79,9 +79,9 @@ def build_graph(network, node, data, sid, eid, depth=0):
 
                     if network.has_edge(node, node_name):
                         network[node][node_name]['attr_dict']['calls'] += 1
-                        network[node][node_name]['attr_dict']['dt_us'] += dt_us
+                        network[node][node_name]['attr_dict']['dt_us'] += [dt_us,]
                     else:
-                        network.add_edge(node, node_name, attr_dict={'dt_us': dt_us, 'calls': 1})
+                        network.add_edge(node, node_name, attr_dict={'dt_us': [dt_us,], 'calls': 1})
 
                     logging.info((' '*depth) + '{}::{} ({} us)'.format(dstart.fb, dstart.method, dt_us))
                     build_graph(network, node_name, data, startid+1, endid-1, depth+1)
@@ -119,8 +119,8 @@ def write_callgrind(network, f, node_dt, node='MAIN::MAIN', depth=0):
     # get selfcost
     for _, n in enumerate(network.neighbors(node)):
 
-        dt_us = network.get_edge_data(node, n)['attr_dict']['dt_us']
-        node_dt -= int(dt_us*1000)
+        for dt_us in network.get_edge_data(node, n)['attr_dict']['dt_us']:
+            node_dt -= int(dt_us*1000)
 
 
     f.write('{} {}\n'.format(1, node_dt))
@@ -128,15 +128,18 @@ def write_callgrind(network, f, node_dt, node='MAIN::MAIN', depth=0):
         fb, method = n.split('::')
 
         calls = network.get_edge_data(node, n)['attr_dict']['calls']
-        f.write('cfl={}\n'.format(ch(fb, '', hashes)))
-        f.write('cfn={}\n'.format(ch(fb, method, hashes)))
-        f.write('calls={} {}\n'.format(calls, 1))
-        f.write('{} {}\n'.format(i, int(dt_us*1000)))
+        dts = network.get_edge_data(node, n)['attr_dict']['dt_us']
+
+        for c in range(calls):
+            f.write('cfl={}\n'.format(ch(fb, '', hashes)))
+            f.write('cfn={}\n'.format(ch(fb, method, hashes)))
+            f.write('calls={} {}\n'.format(1, 1))
+            f.write('{} {}\n'.format(i, int(dts[c-1]*1000)))
 
 
     for i,n in enumerate(network.neighbors(node)):
         dt_us = network.get_edge_data(node, n)['attr_dict']['dt_us']
-        write_callgrind(network, f, node_dt=int(dt_us*1000), node=n, depth=depth+1)
+        write_callgrind(network, f, node_dt=int(max(dt_us)*1000), node=n, depth=depth+1)
 
 
 with open(os.path.join(dest, 'callgrind.callgrind'), 'wt') as f:
