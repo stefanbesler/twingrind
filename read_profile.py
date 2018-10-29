@@ -32,6 +32,8 @@ try:
 
     if trigger:
         logging.debug('trigger measurement')
+        plc.write_by_name('Global.profilerdata.stacksize', 0, yads.PLCTYPE_DINT)
+        time.sleep(1) # no need, but lets be sure
         plc.write_by_name('Global.profilerdata.enabled', True, pyads.PLCTYPE_BOOL)
 
         # wait (we dont really have to since 1 ads call should take at least
@@ -42,6 +44,15 @@ try:
     stacksize = plc.read_by_name('Global.profilerdata.stacksize', pyads.PLCTYPE_DINT)
 
     logging.debug('  -> {} methods were called'.format(int((stacksize-1)/2)))
+
+    # abort if we don't get a valid stack out of it
+    if stacksize == 0:
+        raise Exception('''no methods were called, check if setDataRef for Profiler got called and/or 
+                           # actual called methods > max_stacksize (see parameter in Twincat3 Library''')
+
+    # maybe a TC3 breakpoint is active, or plc crashed?
+    if plc.read_by_name('Global.profilerdata.enabled', pyads.PLCTYPE_BOOL):
+        raise Exception('''profiler still working, breakpoint active?''')
 
     # define a new stack class that can contain as many calls as were
     # actually performed - yes, we can do that with python :)
