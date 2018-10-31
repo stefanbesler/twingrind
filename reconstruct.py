@@ -36,9 +36,8 @@ def extract_stack(stack, hashmap):
     return lst
 
 
-
 def build_graph(network, node, data, sid, eid, depth=0):
-
+    global log,d
     if eid <= sid:
         return;
 
@@ -49,10 +48,10 @@ def build_graph(network, node, data, sid, eid, depth=0):
 
             for endid,dend in data.loc[startid+1:eid,:].iterrows():
 
-                # todo bugfix bei pushMethod, dann können wir uns -1 sparen
+                # Auf depth abfragen waere eventuell schneller
                 if dstart.fb == dend.fb and \
                    dstart.method == dend.method and \
-                                startid != endid:
+                   startid != endid:
 
                     # FB node einfuegen
                     dt_us = 0.1 * (((dend.endhi << 64) + (dend.endlo)) - ((dstart.starthi << 64) + (dstart.startlo)))
@@ -148,7 +147,7 @@ if __name__ == '__main__':
     parser.add_argument("-q", "--masquarade", help="hash fb and methodnames", action="store_true")
     args = vars(parser.parse_args())
 
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     if args['source']:
         hashmap_filepath = glob.glob(os.path.join(args['source'], 'hashmap*'))[0]
