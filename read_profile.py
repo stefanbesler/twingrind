@@ -32,7 +32,7 @@ try:
 
     if trigger:
         logging.debug('trigger measurement')
-        plc.write_by_name('Global.profilerdata.stacksize', 0, yads.PLCTYPE_DINT)
+        plc.write_by_name('Global.profilerdata.stacksize', 0, pyads.PLCTYPE_DINT)
         time.sleep(1) # no need, but lets be sure
         plc.write_by_name('Global.profilerdata.enabled', True, pyads.PLCTYPE_BOOL)
 
