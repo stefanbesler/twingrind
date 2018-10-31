@@ -13,7 +13,7 @@ from plcstack import create_hash
 parser = ArgumentParser("""adds or removes guards to TwinCAT3 function blocks.
 These guards are used for profiling your program""")
 parser.add_argument("-d", "--directory", help="directory containing all function blocks that profiling guards should be modified", required=True)
-parser.add_argument("-o", "--hash_directory", help="directory where the generated hashmap is stored (if action=add)", required=True)
+parser.add_argument("-o", "--hash_directory", help="directory or file where the generated hashmap is stored (if action=add). If parameter is a file the hash gets updated.", required=True)
 parser.add_argument("-a", "--action", help="whether guards should be added or removed", choices=["add", "remove"], required=True)
 args = vars(parser.parse_args())
 
@@ -63,12 +63,6 @@ def add_guards(filepath, fb_name, hashes):
             nearly += i # two guards are always added
             nmethods += 1
 
-            s = r'<Method{spacer0}Name="{method_name}"{spacer2}<ST><!\[CDATA\[{body}\]\]><\/ST>'.format(spacer0=m[0],
-                                                                                                        method_name=method_name,
-                                                                                                        spacer2=m[2],
-                                                                                                        body=old_body,
-                                                                                                        fb=fb_name)
-
             src = src.replace(r'<Method{spacer0}Name="{method_name}"{spacer2}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
                                                                                           method_name=method_name,
                                                                                           spacer2=m[2],
@@ -84,7 +78,6 @@ def add_guards(filepath, fb_name, hashes):
 
     logging.debug("{}: guards added in {} methods - {} early RETURNS".format(fb_name, nmethods, nearly))
 
-    #print(src)
     with open(filepath, "wt") as g:
         g.write(src)
 
@@ -106,6 +99,15 @@ def remove_guards(filepath, fb_name):
 # main
 if __name__ == '__main__':
     hashes = {}
+    hash_path = os.path.join(dest, "hashmap_{}".format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+
+    try:
+        hashes = pickle.load(open(dest, 'rb'))
+        logging.info('updating hashfile')
+        hash_path = dest
+    except:
+        logging.info('generating new hashfile')
+
     main_hash = 0
     if action == "add":
         hashes[main_hash] = ('MAIN', 'MAIN')
@@ -121,6 +123,7 @@ if __name__ == '__main__':
             raise Exception('invalid action {}'.format(action))
 
     if action == "add":
-        pickle.dump(hashes, open(os.path.join(dest, "hashmap_{}".format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))), "wb"))
-
+        pickle.dump(hashes, open(hash_path, "wb"))
+        print('hashmap location={}'.format(hash_path))
+        print('containing {} hashes'.format(len(hashes)))
         print('use {} as hash in your MAIN'.format(main_hash))
