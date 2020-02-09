@@ -18,7 +18,7 @@
     <Company>Company</Company>
     <Released>true</Released>
     <Title>ProfilerLib</Title>
-    <ProjectVersion>0.0.0.1</ProjectVersion>
+    <ProjectVersion>2.0.0.2</ProjectVersion>
     <!--    <OutputType>Exe</OutputType>
     <RootNamespace>MyApplication</RootNamespace>
     <AssemblyName>MyApplication</AssemblyName>-->
