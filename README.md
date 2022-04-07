@@ -1,14 +1,5 @@
 # Twingrind
 
-<div class="gallery">
-  <div class="gallery-item">
-    <figure>
-      <img src=images/dmo1.png" alt="Callgrind demo"/>
-      <figcaption>Example callgrind with obfuscated method names.</figcaption>
-    </figure>
-  </div>
-</div>
-
 The scripts, implemented within the scope of this repository, aim to simple profiling to TwinCAT PLCs. 
 Profiling is restricted to 1 Task and 1 PRG and visualization is implemented via callgrind. http://kcachegrind.sourceforge.net/html/Home.html
 
@@ -20,6 +11,10 @@ The general idea is as follows
 1. reconstruct.py is used to convert the recorded callstacks to callgrind (http://kcachegrind.sourceforge.net/html/CallgrindFormat.html)
 
 The profile can then be visualized by qcachegrind. What follows is a short instruction how to use the code that is provided in this repository for profiling your PLC.
+
+<p align="center">
+  <img src="images/demo1.png" alt="Callgrind demo" height="200px"/>
+</p>
 
 The implementation is by no means feature complete. The current limitations of the profiler already If you are interested to contribute to the project, feel write issues or fork the project and create pull requests. The current limitations of the profiler and the topics, which should be looked in, are as follows.
 
@@ -34,26 +29,11 @@ The Twingrind PLC library can either be downloaded from Github as a [precompiled
 
 First, [get the latest release](todo) of the library, the download will give you a file called "twingrind_2.0.0.2.compiled-library". Note that the version number may differ from the file you actually downloaded. Start the TwinCAT XAE Shell or the Visual Studio Version you are usually using to develop TwinCAT PLCs. Then, in the menubar, select **PLC** and then **Library Repository...** (see figures below)
 
-<div class="gallery">
-  <div class="gallery-item">
-    <figure>
-      <img src=images/installation_twincatxae.png" alt="TwinCAT XAE Shell"/>
-      <figcaption>TwinCAT XAE Shell</figcaption>
-    </figure>
-  </div>
-  <div class="gallery-item">
-    <figure>
-      <img src="images/installation_libraryrepository.png" alt="TwinCAT XAE Shell"/>
-      <figcaption>Library repository</figcaption>
-    </figure>
-  </div>
-  <div class="gallery-item">
-    <figure>
-      <img src="images/add_library.png" alt="Add library"/>
-      <figcaption>Add Twingrind as a library to your PLC.</figcaption>
-    </figure>
-  </div>    
-</div>
+<p align="center">
+  <img src="images/installation_twincatxae.png" alt="TwinCAT XAE Shell" height="200px"/>&emsp;
+  <img src="images/installation_libraryrepository.png" alt="TwinCAT XAE Shell" height="200px"/>&emsp;
+  <img src="images/add_library.png" alt="Add library" height="200px"/>
+</p>
 
 In the library-repository dialog click on **Install** and navigate to the file compiled-library file and select it. Then, click on **Open** to install the struckig library into your TwinCAT environment and you are ready to use it.
 
@@ -87,20 +67,10 @@ The script transverses through the entire code base of the plc located at the gi
 You can now activate your PLC on your target and work as you are used to, note that the Profiler adds some overhead to your code. making execution a bit slower. Usually
 you should not notice a big impact though. To start profiling navigate to your MAIN programm, right click on *Profiler* and `Add Watch`.
 
-<div class="gallery">
-  <div class="gallery-item">
-    <figure>
-      <img src=images/add_watch.png" alt="Add Watch"/>
-      <figcaption>Add Twingrind as a watched variable</figcaption>
-    </figure>
-  </div>
-  <div class="gallery-item">
-    <figure>
-      <img src=images/watch.png" alt="Watch"/>
-      <figcaption>Control Twingrind through the watch window</figcaption>
-    </figure>
-  </div>  
-</div>
+<p align="center">
+  <img src="images/add_watch.png" alt="Add Watch" height="200px"/>&emsp;
+  <img src="images/watch.png" alt="Watch" height="200px"/>
+</p>
 
 Then search for *Twingrind.Profiler* in the Watch panel and expand the node. You can use the watch window to
 - Capture the callstack of a single frame of your PLC by a rising edge of *CaptureOnce*
