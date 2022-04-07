@@ -6,7 +6,7 @@ The scripts, implemented within the scope of this repository, aim to simple prof
 1. fetch.py can be used to read callstack from the PLC
 1. reconstruct.py is used to convert the recorded callstacks to callgrind (http://kcachegrind.sourceforge.net/html/CallgrindFormat.html)
 
-The profile can then be visualized by [qcachegrind](http://kcachegrind.sourceforge.net/html/Home.html). What follows is a short instruction how to use the code that is provided in this repository for profiling your PLC. The following image shows a visualization of the callstack of a single PLC cycle - Method names have been obfuscated
+The profile can then be visualized by [qcachegrind](http://kcachegrind.sourceforge.net/html/Home.html). What follows is a short instruction how to use the code that is provided in this repository for profiling your PLC. The following image shows a visualization of the callstack of a single PLC cycle - Methodnames have been obfuscated
 
 <p align="center">
   <img src="images/demo1.png" alt="Callgrind demo" height="200px"/>
