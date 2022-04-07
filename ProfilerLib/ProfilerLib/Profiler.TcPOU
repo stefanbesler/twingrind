@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.9">
+  <POU Name="Profiler" Id="{b9b8f223-2122-4b0c-bf7b-2e173ae50fad}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Profiler
+VAR_INPUT
+  CaptureOnce : BOOL; //< On rising edge, starts to one frame
+  CaptureContinuous : BOOL; //<  If set record until all frames are filled up, [MAX_FRAMES](xref:Profiler.ParameterList#MAX_FRAMES) controls how many frames are recorded. If all frames are recorded, the flag is reset
+  CaptureCpuTimeThreshold : LREAL; //< In percent (0 - 100) to control which frames should be recorded
+  Reset : BOOL; //< On rising edge, deletes all recorded frames
+END_VAR
+VAR_OUTPUT
+  Busy : BOOL;
+  Error : BOOL;
+  ErrorMessage : STRING;
+  FrameIndex : SINT;  
+  Stacks : ARRAY [0..ParameterList.MAX_FRAMES] OF DINT;  
+  Frames : ARRAY [0..ParameterList.MAX_FRAMES] OF ARRAY[0..ParameterList.MAX_STACKSIZE] OF ProfilerStackStruct;  
+END_VAR
+VAR
+  {attribute 'hide'}
+  _size : DINT;
+  {attribute 'hide'}
+  _stacksize : REFERENCE TO DINT REF= Stacks[0];
+  {attribute 'hide'}
+  _stack : REFERENCE TO ARRAY[0..ParameterList.MAX_STACKSIZE] OF ProfilerStackStruct REF= Frames[0];
+  {attribute 'hide'}
+  _cpuCounter : GETCPUCOUNTER;
+  {attribute 'hide'}
+  _currenttask : GETCURTASKINDEX;
+  {attribute 'hide'}
+  _enabled : BOOL;
+  {attribute 'hide'}
+  _depth : DINT := 0;
+  {attribute 'hide'}
+  _frameRecorded : F_TRIG;
+  {attribute 'hide'}
+  _captureOnceTrig : R_TRIG;
+  {attribute 'hide'}
+  _captureContinuousTrig : R_TRIG;
+  {attribute 'hide'}
+  _resetTrig : R_TRIG;
+  {attribute 'hide'}
+  _i : SINT;  
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[_enabled := FALSE;
+_frameRecorded(CLK:=_enabled);
+_captureOnceTrig(CLK:=CaptureOnce);
+_resetTrig(CLK:=Reset);
+_captureContinuousTrig(CLK:=CaptureContinuous);
+
+IF _captureContinuousTrig.Q
+THEN
+  CaptureOnce := 0;
+  Error := FALSE;
+  ErrorMessage := '';
+END_IF
+
+FOR _i := (FrameIndex+1) TO ParameterList.MAX_FRAMES
+DO
+  Stacks[_i] := 0;
+END_FOR
+
+// discard frame if threshold is not met
+IF _frameRecorded.Q
+THEN
+  _stacksize := _size;
+  _currenttask();  
+  IF 100 * UDINT_TO_LREAL(TwinCAT_SystemInfoVarList._TaskInfo[_currenttask.index].LastExecTime) / UDINT_TO_LREAL(TwinCAT_SystemInfoVarList._TaskInfo[_currenttask.index].CycleTime) > CaptureCpuTimeThreshold
+  THEN
+    FrameIndex := MIN(FrameIndex + 1, ParameterList.MAX_FRAMES);
+  END_IF
+END_IF
+
+IF CaptureContinuous
+THEN
+  _enabled := TRUE;
+  _size := 0;
+ELSE
+  IF _captureOnceTrig.Q
+  THEN
+    Error := FALSE;
+    ErrorMessage := '';
+    _enabled := TRUE;
+    _size := 0;
+  END_IF 
+END_IF
+
+IF _resetTrig.Q
+THEN
+  Error := FALSE;
+  ErrorMessage := '';
+  FrameIndex := 0;
+  _stacksize := 0;
+  _enabled := FALSE;
+END_IF
+
+Busy := _enabled;
+_depth := 0;
+_stack REF= Frames[FrameIndex];
+_stacksize REF= Stacks[FrameIndex];
+_frameRecorded(CLK:=_enabled);]]></ST>
+    </Implementation>
+    <Method Name="Pop" Id="{859e770b-b663-4677-9ba3-3c5fe8fd4fc3}">
+      <Declaration><![CDATA[METHOD Pop
+VAR_INPUT
+  hash : UDINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT _enabled
+THEN
+  RETURN;
+END_IF
+
+_depth := _depth - 1;
+_stack[_size].Depth := _depth;
+_stack[_size].Hash := hash;
+_stack[_size].StartHi := 0;
+_stack[_size].StartLo := 0;
+_cpuCounter(cpuCntLoDW => _stack[_size].EndLo, cpuCntHiDW => _stack[_size].EndHi);
+
+IF _depth < 0
+THEN
+  _enabled := FALSE;
+  Error := TRUE;
+  ErrorMessage := 'Pop/Push mismatch!';
+  RETURN;   
+ELSE
+  _size := _size + 1;
+END_IF
+
+// abort if the stack is getting too big (too many functions were called)
+IF _size > ParameterList.MAX_STACKSIZE
+THEN
+  _enabled := FALSE;
+  Error := TRUE;
+  ErrorMessage := 'The method stack is too big!';  
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Push" Id="{26712f5b-9f3a-41ce-84ed-21cb2c030962}">
+      <Declaration><![CDATA[METHOD Push
+VAR_INPUT
+  hash : UDINT;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT _enabled
+THEN
+  RETURN;
+END_IF
+
+_stack[_size].depth := _depth;
+_stack[_size].hash := hash;
+_cpuCounter(cpuCntLoDW => _stack[_size].StartLo, cpuCntHiDW => _stack[_size].StartHi);
+_stack[_size].endhi := 0;
+_stack[_size].endlo := 0;
+_size := _size + 1;
+_depth := _depth + 1;
+
+// abort if the stack is getting too big (too many functions were called)
+IF _size > ParameterList.MAX_STACKSIZE
+THEN
+  _enabled := FALSE;
+  Error := TRUE;
+  ErrorMessage := 'The method stack is too big!';
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

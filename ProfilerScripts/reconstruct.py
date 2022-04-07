@@ -12,7 +12,7 @@ import pandas
 import pickle
 import networkx
 import pandas as pd
-from plcstack import Call, create_hash
+from plcstack import Call
 
 class Stack(ctypes.Structure):
     _fields_ = [("calls", Call * 32000)]
@@ -21,13 +21,13 @@ class Stack(ctypes.Structure):
 def extract_stack(stack, hashmap):
     nmainhash = 0
     lst = []
+    
+    dt = 0
     for call in stack.calls:
-
         fb, method = hashmap.get(call.hash, (str(call.hash), str(call.hash)))
-
         if fb == 'MAIN':
             nmainhash += 1
-
+                        
         lst.append([fb, method, call.depth, call.starthi, call.startlo, call.endhi, call.endlo])
 
         if nmainhash >= 2:
@@ -53,7 +53,7 @@ def build_graph(network, node, data, sid, eid, depth=0):
                    dstart.method == dend.method and \
                    startid != endid:
 
-                    # FB node einfuegen
+                    # insert fb node
                     dt_us = 0.1 * (((dend.endhi << 64) + (dend.endlo)) - ((dstart.starthi << 64) + (dstart.startlo)))
                     node_name = dstart.fb + '::' + dstart.method
 
@@ -74,25 +74,33 @@ def write_callgrind(network, f, node_dt, node='MAIN::MAIN', depth=0):
 
     ch = lambda x, y: x + '::' + y if len(y) > 0 else x
 
-    if depth == 0:
-        f.write('events: dt')
-
-    # defaulting to cycle time 1 ms if something goes wront
+    # defaulting to cycle time 1 ms if nothing else is specified
     if node_dt < 0 and depth == 0:
         node_dt = 1000000000;
     elif node_dt < 0:
         raise Expection('node_dt < 0')
 
+    if depth == 0:
+    
+        main_dt = network.get_edge_data('root', 'MAIN::MAIN')['attr_dict']['dt_us'][0] * 1000
+        f.write('events: dt')
+        f.write('\nfl={}\n'.format(ch('CYCLE', '')))
+        f.write('fn={}\n'.format(ch('CYCLE', 'CYCLE')))
+        f.write('{} {}\n'.format(1, node_dt - main_dt)) # cycletime
+        f.write('cfl={}\n'.format(ch('MAIN', '')))
+        f.write('cfn={}\n'.format(ch('MAIN', 'MAIN')))        
+        f.write('calls={} {}\n'.format(1, 1))
+        f.write('{} {}\n'.format(0, int(main_dt)))
+        node_dt = main_dt
+            
     node_fb, node_method = node.split('::')
     f.write('\nfl={}\n'.format(ch(node_fb, '')))
     f.write('fn={}\n'.format(ch(node_fb, node_method)))
 
     # get selfcost
     for _, n in enumerate(network.neighbors(node)):
-
         for dt_us in network.get_edge_data(node, n)['attr_dict']['dt_us']:
             node_dt -= int(dt_us*1000)
-
 
     f.write('{} {}\n'.format(1, node_dt))
     for i,n in enumerate(network.neighbors(node)):
@@ -105,11 +113,12 @@ def write_callgrind(network, f, node_dt, node='MAIN::MAIN', depth=0):
             f.write('cfl={}\n'.format(ch(fb, '')))
             f.write('cfn={}\n'.format(ch(fb, method)))
             f.write('calls={} {}\n'.format(1, 1))
-            f.write('{} {}\n'.format(i, int(dts[c-1]*1000)))
+            f.write('{} {}\n'.format(i, int(dts[c]*1000))) # todo c-1?
 
 
     for i,n in enumerate(network.neighbors(node)):
         dt_us = network.get_edge_data(node, n)['attr_dict']['dt_us']
+        print(dt_us)
         write_callgrind(network, f, node_dt=int(max(dt_us)*1000), node=n, depth=depth+1)
 
 
@@ -155,7 +164,7 @@ if __name__ == '__main__':
         dest = args['source']
     else:
         hashmap_filepath = args['hashmap']
-        callstacks = args['callstack']
+        callstacks = [ args['callstack'], ]
         dest = args['dest']
 
     for c in callstacks:

@@ -8,7 +8,6 @@ import pickle
 import copy
 import datetime
 from argparse import ArgumentParser
-from plcstack import create_hash
 
 parser = ArgumentParser("""adds or removes guards to TwinCAT3 function blocks.
 These guards are used for profiling your program""")
@@ -24,6 +23,15 @@ action = args['action']
 dest = args['hash_directory']
 tag = r"(* @@ PROFILER @@ *)"
 
+def create_hash(fb, method, hashes):
+    increment = 0
+    while True:
+        hstr = fb + "::" + method + str(increment)
+        h = hash(hstr) & 4294967295
+        if h not in hashes:
+            hashes[h] = (fb, method)
+            return h
+        increment += 1
 
 def find_files(filepath):
     """walk recursively through folders and look for TwinCat3 source files"""
@@ -54,11 +62,11 @@ def add_guards(filepath, fb_name, hashes):
             old_body = copy.deepcopy(body)
             hash = create_hash(fb_name, method_name, hashes)
 
-            body = '''{tag}Global.profiler.pushMethod({hash});{tag}\n'''.format(hash=hash, tag=tag) + body
+            body = '''{tag}ProfilerLib.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=tag) + body
             body, i = re.subn(r'RETURN([\s]*?);',
-                                r'''\1{tag}Global.profiler.popMethod({hash}); {tag}\1RETURN;'''.format(hash=hash, tag=tag),
+                                r'''\1{tag}ProfilerLib.Profiler.Pop({hash}); {tag}\1RETURN;'''.format(hash=hash, tag=tag),
                                 body, 0, re.S | re.M | re.UNICODE)
-            body = body + '''\n{tag}Global.profiler.popMethod({hash});{tag}'''.format(hash=hash, tag=tag)
+            body = body + '''\n{tag}ProfilerLib.Profiler.Pop({hash});{tag}'''.format(hash=hash, tag=tag)
 
             nearly += i # two guards are always added
             nmethods += 1
@@ -76,7 +84,7 @@ def add_guards(filepath, fb_name, hashes):
 
 
 
-    logging.debug("{}: guards added in {} methods - {} early RETURNS".format(fb_name, nmethods, nearly))
+    logging.debug("{}: guards added in {} methods, contains ({} returns)".format(fb_name, nmethods, nearly+1))
 
     with open(filepath, "wt") as g:
         g.write(src)
