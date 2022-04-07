@@ -45,9 +45,8 @@ Next, add the following code to your MAIN program
 Twingrind.Profiler();
 (* @@ PROFILER @@ *)Twingrind.Profiler.Push(0);(* @@ PROFILER @@ *)
 
-// your existing implementation comes here
+// <your existing implementation comes here>
 
-Twingrind.Profiler();
 (* @@ PROFILER @@ *)Twingrind.Profiler.Pop(0);(* @@ PROFILER @@ *)
 ```
 
