@@ -1,16 +1,12 @@
 # Twingrind
 
-The scripts, implemented within the scope of this repository, aim to simple profiling to TwinCAT PLCs. 
-Profiling is restricted to 1 Task and 1 PRG and visualization is implemented via callgrind. http://kcachegrind.sourceforge.net/html/Home.html
-
-The general idea is as follows
-
+The scripts, implemented within the scope of this repository, aim to simple profiling to TwinCAT PLCs. The general idea of the implementation is as follows.
 1. Twingrind is a TwinCAT library that includes a program, which is used for profiling. It includes methods to built-up a callstack and some triggers to start profiling.
 1. prepare.py is a python script that is used to add profiling boilerplate code to your PLC.
 1. fetch.py can be used to read callstack from the PLC
 1. reconstruct.py is used to convert the recorded callstacks to callgrind (http://kcachegrind.sourceforge.net/html/CallgrindFormat.html)
 
-The profile can then be visualized by qcachegrind. What follows is a short instruction how to use the code that is provided in this repository for profiling your PLC.
+The profile can then be visualized by [qcachegrind](http://kcachegrind.sourceforge.net/html/Home.html). What follows is a short instruction how to use the code that is provided in this repository for profiling your PLC.
 
 <p align="center">
   <img src="images/demo1.png" alt="Callgrind demo" height="200px"/>
