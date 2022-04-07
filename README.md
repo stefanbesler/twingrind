@@ -104,7 +104,7 @@ Creates a callgrind file in the directory given by the option -d. This script us
 
 <p align="center">
   <img src="images/demo.png" alt="Callgrind demo" height="200px"/>&emsp;
-  <img src="images/demo3.png" alt="Callgrind demo" height="200px"/>
+  <img src="images/demo2.png" alt="Callgrind demo" height="200px"/>
 </p>
 
 ## Cleanup
