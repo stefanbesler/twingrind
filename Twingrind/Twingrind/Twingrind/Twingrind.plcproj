@@ -6,7 +6,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{c3e0e12e-171d-4c3c-8375-b12dc038dfe6}</ProjectGuid>
     <SubObjectsSortedByName>True</SubObjectsSortedByName>
-    <Name>ProfilerLib</Name>
+    <Name>Twingrind</Name>
     <ProgramVersion>3.1.4023.0</ProgramVersion>
     <Application>{5cb8600d-36c2-4aed-9484-2799a420f128}</Application>
     <TypeSystem>{ee1e3ca8-77f5-4cde-9c10-f6855ded4270}</TypeSystem>
@@ -17,8 +17,8 @@
     <CombineIds>false</CombineIds>
     <Company>Stefan Besler</Company>
     <Released>false</Released>
-    <Title>ProfilerLib</Title>
-    <ProjectVersion>2.0.0.2</ProjectVersion>
+    <Title>Twingrind</Title>
+    <ProjectVersion>0.1.0.0</ProjectVersion>
     <Author>Stefan Besler and Contributers</Author>
     <!--    <OutputType>Exe</OutputType>
     <RootNamespace>MyApplication</RootNamespace>
@@ -35,9 +35,6 @@
     <Compile Include="ProfilerStackStruct.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Version\Global_Version.TcGVL">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <PlaceholderReference Include="Tc2_Standard">
@@ -48,9 +45,6 @@
       <DefaultResolution>Tc2_System, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc2_System</Namespace>
     </PlaceholderReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Version" />
   </ItemGroup>
   <ProjectExtensions>
     <PlcProjectOptions>

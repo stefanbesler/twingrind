@@ -62,11 +62,11 @@ def add_guards(filepath, fb_name, hashes):
             old_body = copy.deepcopy(body)
             hash = create_hash(fb_name, method_name, hashes)
 
-            body = '''{tag}ProfilerLib.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=tag) + body
+            body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=tag) + body
             body, i = re.subn(r'RETURN([\s]*?);',
-                                r'''\1{tag}ProfilerLib.Profiler.Pop({hash}); {tag}\1RETURN;'''.format(hash=hash, tag=tag),
-                                body, 0, re.S | re.M | re.UNICODE)
-            body = body + '''\n{tag}ProfilerLib.Profiler.Pop({hash});{tag}'''.format(hash=hash, tag=tag)
+                              r'''\1{tag}Twingrind.Profiler.Pop({hash}); {tag}\1RETURN;'''.format(hash=hash, tag=tag),
+                              body, 0, re.S | re.M | re.UNICODE)
+            body = body + '''\n{tag}Twingrind.Profiler.Pop({hash});{tag}'''.format(hash=hash, tag=tag)
 
             nearly += i # two guards are always added
             nmethods += 1

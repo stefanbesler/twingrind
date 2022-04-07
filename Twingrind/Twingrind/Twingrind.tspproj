@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.22">
+	<Project ProjectGUID="{A16004EA-33C0-4358-8B6F-71035443BB89}" ShowHideConfigurations="#x106">
+		<Plc>
+			<Project GUID="{C3E0E12E-171D-4C3C-8375-B12DC038DFE6}" Name="Twingrind" PrjFilePath="Twingrind\Twingrind.plcproj" TmcFilePath="Twingrind\Twingrind.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e"/>
+		</Plc>
+	</Project>
+</TcSmProject>
