@@ -16,11 +16,11 @@ The profiler can be set up to only capture callstacks of PLC cycles, which take 
 
 The implementation is by no means feature complete and far from perfect. The core of the implementation was written way before TwinCAT offered any kind of profile mechanism and I actually had the needs of a profile to find a serious problem in a PLC. Nowadays profiling for TwinCAT is offered by Beckhoff, but is of course attached with licencing fees and subpar visualization (my two cents). Twingrind instead uses a common fileformat for profiling and is free software. If you are interested to contribute to the project, feel write issues or fork the project and create pull requests. The current limitations of the profiler and the topics, which should be looked in, are as follows.
 
-[x] *Only methods are profiled, calls to function blocks are not implemented yet.* > Support for methods and functionblock calls
-[ ] Only 1 task and 1 PRG are supported.
-[ ] Profiling itself adds some overhead to your code, which can not be avoided by this method, but maybe reduced by a fair bit.
-[x] *Calls in referenced PLC methods are not profiled and at the moment there is no way to add the profiling boilerplate code to PLC libraries, which are used by your PLC* > *prepare.py* can now be called for library plcs and the hashmap file can be reused
-[ ] No unicode character support in source files
+- [x] *Only methods are profiled, calls to function blocks are not implemented yet.* > Support for methods and functionblock calls
+- [ ] Only 1 task and 1 PRG are supported.
+- [ ] Profiling itself adds some overhead to your code, which can not be avoided by this method, but maybe reduced by a fair bit.
+- [x] *Calls in referenced PLC methods are not profiled and at the moment there is no way to add the profiling boilerplate code to PLC libraries, which are used by your PLC* > *prepare.py* can now be called for library plcs and the hashmap file can be reused
+- [ ] No unicode character support in source files
 
 ## Backup
 
