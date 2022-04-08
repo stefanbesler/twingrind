@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 parser = ArgumentParser("""adds or removes guards to TwinCAT3 function blocks.
 These guards are used for profiling your program""")
 parser.add_argument("-d", "--directory", help="directory containing all function blocks that profiling guards should be modified", required=True)
-parser.add_argument("-o", "--hash_directory", help="directory or file where the generated hashmap is stored (if action=add). If parameter is a file the hash gets updated.", required=True)
+parser.add_argument("-m", "--hashmap", help="hash map")
 parser.add_argument("-a", "--action", help="whether guards should be added or removed", choices=["add", "remove"], required=True)
 args = vars(parser.parse_args())
 
@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 filepath = args['directory']
 action = args['action']
-dest = args['hash_directory']
+dest = args['hashmap']
 tag = r"(* @@ PROFILER @@ *)"
 
 def create_hash(fb, method, hashes):
