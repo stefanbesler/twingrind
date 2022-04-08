@@ -103,9 +103,11 @@ python reconstruct.py -m <HASHMAPFILE> -c <CALLSTACK> -d <CALLGRIND_OUTPUT_DIR>
 
 Creates a callgrind file in the directory given by the option -d. This script uses a previously generated hashmap (output of *prepare.py*) together with a recorded callstack (output of *fetch.py*). Run the reconstruct command for all frames that were exported by *fetch.py*. You may then open [qcachegrind](http://kcachegrind.sourceforge.net/html/Home.html) to visualize the callstack of your captured cycles.
 
+In the images below the left one shows the overview over a complete cycle. The PLC that I was running when taking this picture didn't us a lot of cpu ticks that is why there is a lot of empty space in *CYCLE::CYCLE*. The right image is zoomed into the MAIN PRG.
+
 <p align="center">
-  <img src="images/demo.png" alt="Callgrind demo" height="200px"/>&emsp;
-  <img src="images/demo3.png" alt="Callgrind demo" height="200px"/>
+  <img src="images/demo3.png" alt="Callgrind demo" height="200px"/>&emsp;
+  <img src="images/demo4.png" alt="Callgrind demo" height="200px"/>  
 </p>
 
 ## Cleanup
