@@ -14,7 +14,7 @@ The profile can then be visualized by [qcachegrind](http://kcachegrind.sourcefor
 
 The profiler can be set up to only capture callstacks of PLC cycles, which take "too long", which is adjustable by a threshold that is relative to the PLC cycletime. This feature is super handy for finding realtime violation issues where  the cycletime is exceeded.
 
-The implementation is by no means feature complete and far from perfect. The core of the implementation was written way before TwinCAT offered any kind of profile mechanism and I actually had the needs of a profile to find a serious problem in a PLC. Nowadays profiling for TwinCAT is offered by Beckhoff, but is of course attached with licencing fees and subpar visualization (my two cents). Twingrind instead uses a common fileformat for profiling and is free software. If you are interested to contribute to the project, feel write issues or fork the project and create pull requests. The current limitations of the profiler and the topics, which should be looked in, are as follows.
+The implementation is by no means feature complete and far from perfect. The core of the implementation was written way before TwinCAT offered any kind of profile mechanism, and I actually had the needs of a profile to find a serious problem in a PLC. Nowadays profiling for TwinCAT is offered by Beckhoff, but is of course attached with licencing fees and subpar visualization (my two cents). Twingrind instead uses a common fileformat for profiling and is free software. If you are interested to contribute to the project, feel free to write issues or fork the project and create pull requests. The current limitations of the profiler and the topics, which should be looked in, are as follows.
 
 - [x] *Only methods are profiled, calls to function blocks are not implemented yet.* > Support for methods and functionblock calls
 - [ ] Only 1 task and 1 PRG are supported.
@@ -24,11 +24,11 @@ The implementation is by no means feature complete and far from perfect. The cor
 
 ## Backup
 
-Before profile you should backup your code by commiting it to your version-control system or at least copy&paste it to a different location. The script will modifiy your existing source code and although it has been tested thoroughly it is always better to err on the side of caution.
+Before profiling you should backup your code by commiting it to your version-control system or at least copy&paste it to a different location. The script will modify your existing source code and although it has been tested thoroughly, it is always better to err on the side of caution.
 
 ## Add library
 
-The Twingrind PLC library can either be downloaded from Github as a [precompiled library](https://github.com/stefanbesler/twingrind/releases), or you can clone the [repository](https://github.com/stefanbesler/twingrind) and compile the library yourself. This guide will focus on the former usecase.
+The Twingrind PLC library can either be downloaded from Github as a [precompiled library](https://github.com/stefanbesler/twingrind/releases), or you can clone the [repository](https://github.com/stefanbesler/twingrind) and compile the library yourself. This guide will focus on the former use case.
 
 First, [get the latest release](todo) of the library, the download will give you a file called "twingrind_2.0.0.2.compiled-library". Note that the version number may differ from the file you actually downloaded. Start the TwinCAT XAE Shell or the Visual Studio Version you are usually using to develop TwinCAT PLCs. Then, in the menubar, select **PLC** and then **Library Repository...** (see figures below)
 
@@ -38,9 +38,9 @@ First, [get the latest release](todo) of the library, the download will give you
   <img src="images/add_library.png" alt="Add library" height="200px"/>
 </p>
 
-In the library-repository dialog click on **Install** and navigate to the file compiled-library file and select it. Then, click on **Open** to install the struckig library into your TwinCAT environment and you are ready to use it.
+In the library-repository dialog, click on **Install** and navigate to the file compiled-library file and select it. Then, click on **Open** to install the struckig library into your TwinCAT environment, and you are ready to use it.
 
-To make the Twingrind library available to the PLC, open the solution, which contains the PLC you want to profile. In the solution explorer expand the PLC you are interested in and right-click on **References**. Select **Add library**. In the dialog search for ***Twingrind***, then select the item and click on **Ok**
+To make the Twingrind library available to the PLC, open the solution, which contains the PLC you want to profile. In the solution explorer, expand the PLC you are interested in and right-click on **References**. Select **Add library**. In the dialog, search for ***Twingrind***, then select the item and click on **Ok**
 
 ## Prepare
 
