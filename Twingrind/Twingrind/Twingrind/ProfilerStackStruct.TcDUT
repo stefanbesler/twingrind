@@ -5,10 +5,10 @@
 STRUCT
   Hash : UDINT;
   Depth : DINT;
-  StartLo : LWORD;
-  StartHi : LWORD;  
-  EndLo : LWORD;
-  EndHi : LWORD;  
+  StartLo : DWORD;
+  StartHi : DWORD;  
+  EndLo : DWORD;
+  EndHi : DWORD;  
 END_STRUCT
 END_TYPE
 ]]></Declaration>
