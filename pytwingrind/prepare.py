@@ -46,17 +46,58 @@ def find_files(filepath):
 def add_guards(filepath, fb_name, hashes):
     """add guards to fb and all methods for this file"""
 
-    with open(filepath, "rt") as f:
-        src = f.read()
-        if tag in src:
-            logging.warning("profiler guards seem already present in {}, skipping".format(fb_name))
-            return
+    src = ""
+    
+    try:
+        with open(filepath, "rt") as f:
+            src = f.read()
+            if tag in src:
+                logging.warning("Profiler guards seem already present in {}, skipping".format(fb_name))
+                return
+    except UnicodeDecodeError as ex:
+        print('File {} contains invalid characters, only ascii is supported'.format(filepath))
+        raise ex
 
-    methods = re.findall(r'<Method(.*?)Name="(.*?)"(.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
+    # add guards to function blocks
+    functionblocks = re.findall(r'<POU(.*?)Name="(.*?)"(.*?)FUNCTION_BLOCK(.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
     nearly = 0
-    nmethods = 0
+    ncallables = 0
+    if functionblocks:
+        for m in functionblocks:
+            functionblock_name = m[1]
+            body = m[4]
+            old_body = copy.deepcopy(body)
+            hash = create_hash(fb_name, functionblock_name, hashes)
+
+            body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=tag) + body
+            body, i = re.subn(r'RETURN([\s]*?);',
+                              r'''\1{tag}Twingrind.Profiler.Pop({hash}); {tag}\1RETURN;'''.format(hash=hash, tag=tag),
+                              body, 0, re.S | re.M | re.UNICODE)
+            body = body + '''\n{tag}Twingrind.Profiler.Pop({hash});{tag}'''.format(hash=hash, tag=tag)
+
+            nearly += i # two guards are always added
+            ncallables += 1
+
+            src = src.replace(r'<POU{spacer0}Name="{functionblock_name}"{spacer2}FUNCTION_BLOCK{spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
+                                                                                          functionblock_name=functionblock_name,
+                                                                                          spacer2=m[2],
+                                                                                          spacer3=m[3],
+                                                                                          body=old_body,
+                                                                                          fb=fb_name),
+                              r'<POU{spacer0}Name="{functionblock_name}"{spacer2}FUNCTION_BLOCK{spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
+                                                                                          functionblock_name=functionblock_name,
+                                                                                          spacer2=m[2],
+                                                                                          spacer3=m[3],
+                                                                                          body=body,
+                                                                                          fb=fb_name))
+
+    # add guards to all methods
+    methods = re.findall(r'<Method(.*?)Name="(.*?)"(.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
     if methods:
         for m in methods:
+            if ' ABSTRACT ' in m[2]:
+                continue
+            
             method_name = m[1]
             body = m[3]
             old_body = copy.deepcopy(body)
@@ -69,7 +110,7 @@ def add_guards(filepath, fb_name, hashes):
             body = body + '''\n{tag}Twingrind.Profiler.Pop({hash});{tag}'''.format(hash=hash, tag=tag)
 
             nearly += i # two guards are always added
-            nmethods += 1
+            ncallables += 1
 
             src = src.replace(r'<Method{spacer0}Name="{method_name}"{spacer2}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
                                                                                           method_name=method_name,
@@ -84,7 +125,7 @@ def add_guards(filepath, fb_name, hashes):
 
 
 
-    logging.debug("{}: guards added in {} methods, contains ({} returns)".format(fb_name, nmethods, nearly+1))
+    logging.debug("{}: guards added in {} methods, contains ({} returns)".format(fb_name, ncallables, nearly+1))
 
     with open(filepath, "wt") as g:
         g.write(src)
@@ -103,20 +144,17 @@ def remove_guards(filepath, fb_name):
     with open(filepath, "wt") as g:
         g.write(src_new)
 
-
-# main
-if __name__ == '__main__':
+def main():
     hashes = {}
-    hash_path = os.path.join(dest, "hashmap_{}".format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+    hash_path = dest
 
     try:
-        hashes = pickle.load(open(dest, 'rb'))
-        logging.info('updating hashfile')
-        hash_path = dest
+        hashes = pickle.load(open(hash_path, 'rb'))
+        logging.info('Updating an existing hashfile')
     except:
-        logging.info('generating new hashfile')
+        logging.info('Creating a new hashfile')
 
-    main_hash = 0
+    main_hash = 0 # hash for main.prg is fixed
     if action == "add":
         hashes[main_hash] = ('MAIN', 'MAIN')
 
@@ -128,10 +166,14 @@ if __name__ == '__main__':
         elif action == "remove":
             remove_guards(f, fb_name)
         else:
-            raise Exception('invalid action {}'.format(action))
+            raise Exception('Invalid action {} use [add, remove]'.format(action))
 
     if action == "add":
         pickle.dump(hashes, open(hash_path, "wb"))
-        print('hashmap location={}'.format(hash_path))
-        print('containing {} hashes'.format(len(hashes)))
-        print('use {} as hash in your MAIN'.format(main_hash))
+        print('Hashmap location={}'.format(hash_path))
+        print('Containing {} hashes'.format(len(hashes)))
+        print('Do not forget to add the boilerplate code with hash=0 in your MAIN.PRG'.format(main_hash))    
+
+# main
+if __name__ == '__main__':
+    main()
