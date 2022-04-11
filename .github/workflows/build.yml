@@ -24,4 +24,10 @@ jobs:
         run: |
           cd pytwingrind
           python setup.py bdist_wheel
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Twingrind
+          path: |
+            *.compiled-library
+            pytwingrind/dist/*.whl
           
