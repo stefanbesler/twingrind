@@ -28,6 +28,6 @@ jobs:
         with:
           name: Twingrind
           path: |
-            *.compiled-library
+            **/*.compiled-library
             pytwingrind/dist/*.whl
           
