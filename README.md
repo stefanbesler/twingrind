@@ -73,7 +73,7 @@ Twingrind.Profiler.Pop(0);
 The PRG *Profiler* has inputs to control the profiler, we will later add it to the watch window to control it. The methods *Push* and *Pop* are used for time measurements. Calling this method in the implementation of your main program is mandatory. After added the 3 lines of code, as shown above, use `prepare.py` to add similar code section to all methods of your PLC.
 
 ```
-twingrind -d <PATH_TO_FOLDER_CONTAINING_PLCPROJ> -m <PATH_TO_HASHMAP_FILE>
+twingrind prepare -d <PATH_TO_FOLDER_CONTAINING_PLCPROJ> -m <PATH_TO_HASHMAP_FILE>
 ```
 
 The command transverses through the entire code base located at the given directory. For all methods it adds a similar call 
