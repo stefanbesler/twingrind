@@ -8,6 +8,10 @@
       "type": "Library",
       "frameworks": {},
       "references": {
+        "TC3.1.4024.22": [
+         "Tc2_Standard=*",        
+          "Tc2_System=*"
+        ],        
         "TC3.1.4024.25": [
          "Tc2_Standard=*",        
           "Tc2_System=*"
