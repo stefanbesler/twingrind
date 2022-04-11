@@ -48,11 +48,11 @@ To make the Twingrind library available to the PLC, open the solution, which con
 
 ### pytwingrind python-module
 
-Open a command prompt and navigate to the *pytwingrind-0.1.0-py3-none-any.whl* file. Then use the following command to install the python module on your system.
+Open a command prompt and navigate to the *pytwingrind-0.1.1-py3-none-any.whl* file. Then use the following command to install the python module on your system.
 Make sure that your python environment is reachable in your path variable.
 
 ```
-pip install pytwingrind-0.1.0-py3-none-any.whl
+pip install pytwingrind-0.1.1-py3-none-any.whl
 ```
 
 After running the command successfully, the executable `twingrind.exe` should be available in your path.
