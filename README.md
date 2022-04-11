@@ -16,7 +16,7 @@ The profiler can be set up to only capture callstacks of PLC cycles, which take 
 
 The implementation is by no means feature complete and far from perfect. The core of the implementation was written way before TwinCAT offered any kind of profile mechanism, and I actually had the needs of a profile to find a serious problem in a PLC. Nowadays profiling for TwinCAT is offered by Beckhoff, but is of course attached with licencing fees and subpar visualization (my two cents). Twingrind instead uses a common fileformat for profiling and is free software. If you are interested to contribute to the project, feel free to write issues or fork the project and create pull requests. The current limitations of the profiler and the topics, which should be looked in, are as follows.
 
-- [x] *Only methods are profiled, calls to function blocks are not implemented yet.* > Support for methods and functionblock calls
+- [x] *Only methods are profiled, calls to function blocks are not implemented yet.* > Support for methods and functionblock calls and functions
 - [ ] Only 1 task and 1 PRG are supported.
 - [ ] Profiling itself adds some overhead to your code, which can not be avoided by this method, but maybe reduced by a fair bit.
 - [x] *Calls in referenced PLC methods are not profiled and at the moment there is no way to add the profiling boilerplate code to PLC libraries, which are used by your PLC* > *prepare.py* can now be called for library plcs and the hashmap file can be reused
@@ -30,7 +30,7 @@ Before profiling you should backup your code by commiting it to your version-con
 
 Twingrind can either be downloaded from Github as or you can clone the [repository](https://github.com/stefanbesler/twingrind) and compile the library yourself. This guide will focus on the former use case.
 
-First, [get the latest release](todo) of the library, the download will give you a file called "twingrind_2.0.0.2.compiled-library" and a python setup file. Note that the version number may differ from the file you actually downloaded. 
+First, [get the latest release](https://github.com/stefanbesler/twingrind/releases) of the Twingrind, the download will give you a file called "twingrind_0.1.1.0.compiled-library" and a python setup file. Note that the version number may differ from the file you actually downloaded. 
 
 ### Twingrind PLC library
 
@@ -70,7 +70,7 @@ Twingrind.Profiler.Push(0);
 Twingrind.Profiler.Pop(0);
 ```
 
-The PRG *Profiler* has inputs to control the profiler, we will later add it to the watch window to control it. The methods *Push* and *Pop* are used for time measurements. Calling this method in the implementation of your main program is mandatory. After added the 3 lines of code, as shown above, use `prepare.py` to add similar code section to all methods of your PLC.
+The PRG *Profiler* has inputs to control the profiler, we will later add it to the watch window to control it. The methods *Push* and *Pop* are used for time measurements. Calling this method in the implementation of your main program is mandatory. After added the 3 lines of code, as shown above, use `twingrind.exe prepare` to add similar code section to all methods of your PLC.
 
 ```
 twingrind prepare -d <PATH_TO_FOLDER_CONTAINING_PLCPROJ> -m <PATH_TO_HASHMAP_FILE>
