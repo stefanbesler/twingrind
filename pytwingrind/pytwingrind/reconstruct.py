@@ -1,21 +1,10 @@
 import os
-import sys
-import re
 import logging
-import time
-import datetime
-from argparse import ArgumentParser
-import pyads
-import ctypes
 import glob
-import pandas
 import pickle
 import networkx
 import pandas as pd
-from plcstack import Call
-
-class Stack(ctypes.Structure):
-    _fields_ = [("calls", Call * (320000))]
+from pytwingrind.common import Call
 
 def extract_stack(stack, hashmap):
     nmainhash = 0
@@ -54,7 +43,7 @@ def build_graph(network, node_start, data, sid, eid, depth=0):
                     else:
                         network.add_edge(node_start, startid, attr_dict={'dt_us': [dt_us,], 'calls': 1, 'name': '{}::{}'.format(dstart.fb, dstart.method)})
 
-                    logging.info((' '*depth) + '{}::{} ({} ns) [{}, {}]'.format(dstart.fb, dstart.method, int(dt_us * 1000), startid, endid))
+                    #logging.info((' '*depth) + '{}::{} ({} ns) [{}, {}]'.format(dstart.fb, dstart.method, int(dt_us * 1000), startid, endid))
                     build_graph(network, startid, data, startid+1, endid-1, depth+1)
 
                     lastid = endid+1
@@ -88,14 +77,7 @@ def write_callgrind(network, f, selfcost, node_start=0, node_name='MAIN::MAIN', 
     # calculate self costs by substracting the costs of all calls
     for _, n in enumerate(network.neighbors(node_start)):
         for dt_us in network.get_edge_data(node_start, n)['attr_dict']['dt_us']:
-            selfcost -= int(dt_us*1000)
-        
-    for _, n in enumerate(network.neighbors(node_start)):
-        print("depth" + str(depth) + "node: " + node_name  +" n: " + network.get_edge_data(node_start, n)['attr_dict']['name'])        
-            
-    if(depth > 12):            
-        import sys
-        sys.exit(-1)        
+            selfcost -= int(dt_us*1000)  
         
     node_fb, node_method = node_name.split('::')
     f.write('\nfl={}\n'.format(ch(node_fb, '')))
@@ -120,52 +102,20 @@ def write_callgrind(network, f, selfcost, node_start=0, node_name='MAIN::MAIN', 
 
 
 
-def reconstruct(hashmap_filepath, callstack_filepath, dest, args):
-
-    stack = pickle.load(open(callstack_filepath, 'rb'))
-    hm = pickle.load(open(hashmap_filepath, 'rb'))
+def run(hashmap: str, callstack: str, dest: str, cycletime: float):
+    logging.info(f"Reconstructing callstack {callstack}")
+    stack = pickle.load(open(callstack, 'rb'))
+    hm = pickle.load(open(hashmap, 'rb'))
 
     lst = extract_stack(stack, hm)
-    print(lst[0])
     data = pd.DataFrame(lst, columns=['fb', 'method', 'depth', 'starthi', 'startlo', 'endhi', 'endlo', 'hash'])
 
     n = networkx.DiGraph()
     build_graph(n, 'root', data, 0, len(lst) - 1)
-    
-    if args and args['graph']:
-        import matplotlib.pyplot as plt
-        networkx.draw(n, with_labels=True)
-        plt.show()    
-    
-    logging.info('{} entries in callstack'.format(int(len(lst) / 2)))
+ 
+    logging.info(f'Reconstructed {int(len(lst) / 2)} calls')
+    filename = os.path.join(dest, 'callgrind.{}'.format(os.path.basename(callstack)))
+    with open(filename, 'wt') as f:
+        write_callgrind(n, f, int(cycletime * 1000000))
+        logging.info(f'Reconstructed callgrind file to {filename}')
 
-    with open(os.path.join(dest, 'callgrind.{}'.format(os.path.basename(callstack_filepath))), 'wt') as f:
-        write_callgrind(n, f, int(args['cycletime_ms'] * 1000000))
-
-
-if __name__ == '__main__':
-    parser = ArgumentParser("""triggers the measurement of a single profile and
-    stores the corresponding callstack on disk""")
-
-    parser.add_argument("-m", "--hashmap", help="hash map")
-    parser.add_argument("-c", "--callstack", help="callstack")
-    parser.add_argument("-s", "--source", help="folder containing several callstacks and 1 hashmap")
-    parser.add_argument("-d", "--dest", help="output directory ", default="./")
-    parser.add_argument("-g", "--graph", help="output directory ", action="store_true")
-    parser.add_argument("-t", "--cycletime_ms", help="plc cycletime in milliseconds", default=1)
-    parser.add_argument("-q", "--masquarade", help="hash fb and methodnames", action="store_true")
-    args = vars(parser.parse_args())
-
-    logging.basicConfig(level=logging.INFO)
-
-    if args['source']:
-        hashmap_filepath = glob.glob(os.path.join(args['source'], 'hashmap*'))[0]
-        callstacks = glob.glob(os.path.join(args['source'], 'callstack*'))
-        dest = args['source']
-    else:
-        hashmap_filepath = args['hashmap']
-        callstacks = [ args['callstack'], ]
-        dest = args['dest']
-
-    for c in callstacks:
-        reconstruct(hashmap_filepath, c, dest, args)

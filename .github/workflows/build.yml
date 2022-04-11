@@ -1,0 +1,26 @@
+name: Build/Test
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Twingrind/**'
+      - 'pytwingrind/**'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  Build:
+    name: Build/Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Twingrind
+        uses: Zeugwerk/zkbuild-action@1.0.0
+        with:
+          username: ${{ secrets.ACTIONS_ZGWK_USERNAME }}
+          password: ${{ secrets.ACTIONS_ZGWK_PASSWORD }}
+      - name: Build pytwingrind
+        run: |
+          cd pytwingrind
+          python setup.py bdist_wheel
+          

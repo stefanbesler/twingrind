@@ -1,3 +1,8 @@
+# python
+pytwingrind/build
+pytwingrind/dist
+*.egg-info
+
 # TwinCAT files
 *.tpy
 *.tclrs

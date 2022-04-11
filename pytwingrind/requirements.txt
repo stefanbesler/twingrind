@@ -1,0 +1,3 @@
+pyads~=3.3.9
+networkx
+pandas
