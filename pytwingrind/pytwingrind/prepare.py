@@ -27,14 +27,13 @@ def find_files(filepath):
             if re_source:
                 yield os.path.join(subdir, f)
 
-
 def add_guards(filepath, fb_name, hashes):
     """add guards to fb and all methods for this file"""
 
     src = ""
     
     try:
-        with open(filepath, "rt") as f:
+        with open(filepath, "rt", encoding=common.detect_encoding(filepath)) as f:
             src = f.read()
             if common.profiler_tag in src:
                 logging.warning("Profiler guards seem already present in {}, skipping".format(fb_name))
@@ -142,7 +141,7 @@ def add_guards(filepath, fb_name, hashes):
 
     logging.debug("{}: guards added in {} methods, contains ({} returns)".format(fb_name, ncallables, nearly+1))
 
-    with open(filepath, "wt") as g:
+    with open(filepath, "wt", encoding=common.detect_encoding(filepath)) as g:
         g.write(src)
 
 
