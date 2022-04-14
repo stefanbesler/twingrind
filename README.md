@@ -20,7 +20,7 @@ The implementation is by no means feature complete and far from perfect. The cor
 - [ ] Only 1 task and 1 PRG are supported.
 - [ ] Profiling itself adds some overhead to your code, which can not be avoided by this method, but maybe reduced by a fair bit.
 - [x] *Calls in referenced PLC methods are not profiled and at the moment there is no way to add the profiling boilerplate code to PLC libraries, which are used by your PLC* > *prepare.py* can now be called for library plcs and the hashmap file can be reused
-- [ ] No unicode character support in source files
+- [x] *No unicode character support in source files* reading files automatically detects its encoding and write the source code back with the same encoding
 
 ## Backup
 
