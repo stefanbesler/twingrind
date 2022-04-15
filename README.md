@@ -1,6 +1,6 @@
 # Twingrind
 
-This project aims to add simple profiling to TwinCAT PLCs. The general idea of the implementation is as follows.
+This project brings profiling to TwinCAT PLCs. The general idea of the implementation is as follows.
 1. Twingrind is a TwinCAT library that includes a program, which is used for profiling. It includes methods to built-up a callstack and some triggers to start profiling.
 1. prepare.py is a python script that is used to add profiling boilerplate code to your PLC.
 1. fetch.py can be used to read callstack from the PLC
