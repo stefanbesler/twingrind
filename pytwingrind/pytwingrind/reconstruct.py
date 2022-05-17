@@ -16,25 +16,21 @@ class StackRow(IntEnum):
 
 
 def extract_stack(stack, hashmap):
-    nmainhash = 0
     data = np.zeros((len(stack.calls), 4), dtype=np.uint64)
     size = 0
-
     def hilo_to_lword(hi, lo): return ((hi << 32) + lo)
-
+    
     for call in stack.calls:
-        if call.hash == 0:  # MAIN PRG
-            nmainhash += 1
-
         data[size] = [call.depth, 0.1 * hilo_to_lword(
             call.starthi, call.startlo), 0.1 * hilo_to_lword(call.endhi, call.endlo), call.hash]
 
-        if nmainhash >= 2:
-            break
-
+        # no more valid timestamps
+        if np.all(data[size] == 0):
+            break;
         size = size + 1
 
-    return data[0:size+1]
+    logging.info(f"Extracted {int(size/2)} calls")
+    return data[0:size]
 
 
 def build_graph(network, hashmap, roots, data, sid=-1, eid=-1):
@@ -47,11 +43,9 @@ def build_graph(network, hashmap, roots, data, sid=-1, eid=-1):
                      data[sid+1:eid, StackRow.DEPTH] == data[sid, StackRow.DEPTH]))[0][0] + sid + 1
     dt_us = data[endid, StackRow.END_US] - data[sid, StackRow.START_US]
     fb, method = hashmap[data[endid, StackRow.HASH]]
-    depth = int(data[endid, StackRow.DEPTH])
+    depth = int(data[endid, StackRow.DEPTH])+1
 
-    if depth > 0:
-        roots = roots[0:depth]
-
+    roots = roots[0:depth]
     parent = roots[-1]
 
     if network.has_edge(parent, sid):
@@ -65,7 +59,7 @@ def build_graph(network, hashmap, roots, data, sid=-1, eid=-1):
         build_graph(network, hashmap, roots + [sid], data, sid+1, endid)
 
     if(endid+1 < len(data)) and endid+1 != eid:
-        build_graph(network, hashmap, roots + [sid], data, endid+1, eid)
+        build_graph(network, hashmap, roots, data, endid+1, eid, True)
 
 
 def write_callgrind(network, f, selfcost, node_start="root", node_name='MAIN::MAIN', depth=0):
@@ -83,8 +77,8 @@ def write_callgrind(network, f, selfcost, node_start="root", node_name='MAIN::MA
         main_dt = network.get_edge_data(
             'root', 0)['attr_dict']['dt_us'][0] * 1000
         f.write('events: dt')
-        f.write('\nfl={}\n'.format(ch('CYCLE', '')))
-        f.write('fn={}\n'.format(ch('CYCLE', 'CYCLE')))
+        f.write('\nfl={}\n'.format(ch('Task', '')))
+        f.write('fn={}\n'.format(ch('Task', 'Task')))
         f.write('{} {}\n'.format(1, int(selfcost - main_dt)))  # self cost
         f.write('cfl={}\n'.format(ch('MAIN', '')))
         f.write('cfn={}\n'.format(ch('MAIN', 'MAIN')))

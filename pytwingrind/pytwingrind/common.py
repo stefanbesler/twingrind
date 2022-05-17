@@ -26,6 +26,9 @@ class Call(ctypes.Structure):
                 ("starthi", ctypes.c_uint32),
                 ("endlo", ctypes.c_uint32),
                 ("endhi", ctypes.c_uint32)]
-
-class Stack(ctypes.Structure):
-    _fields_ = [("calls", Call * (320000))]
+                
+class Callstack(object):
+    def __init__(self, cycletime : int, task : int, stack : ctypes.Structure):
+        self.cycletime = cycletime
+        self.task = task
+        self.stack = stack
