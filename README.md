@@ -30,7 +30,7 @@ Before profiling you should backup your code by commiting it to your version-con
 
 Twingrind can either be downloaded from Github as or you can clone the [repository](https://github.com/stefanbesler/twingrind) and compile the library yourself. This guide will focus on the former use case.
 
-First, [get the latest release](https://github.com/stefanbesler/twingrind/releases) of the Twingrind, the download will give you a file called "twingrind_0.1.1.0.compiled-library" and a python setup file. Note that the version number may differ from the file you actually downloaded. 
+First, [get the latest release](https://github.com/stefanbesler/twingrind/releases) of the Twingrind, the download will give you a file called "twingrind_0.2.0.0.compiled-library" and a python setup file. Note that the version number may differ from the file you actually downloaded. 
 
 ### Twingrind PLC library
 
@@ -48,11 +48,11 @@ To make the Twingrind library available to the PLC, open the solution, which con
 
 ### pytwingrind python-module
 
-Open a command prompt and navigate to the *pytwingrind-0.1.1-py3-none-any.whl* file. Then use the following command to install the python module on your system.
+Open a command prompt and navigate to the *pytwingrind-0.2.0-py3-none-any.whl* file. Then use the following command to install the python module on your system.
 Make sure that your python environment is reachable in your path variable.
 
 ```
-pip install pytwingrind-0.1.1-py3-none-any.whl
+pip install pytwingrind-0.2.0-py3-none-any.whl
 ```
 
 After running the command successfully, the executable `twingrind.exe` should be available in your path.
