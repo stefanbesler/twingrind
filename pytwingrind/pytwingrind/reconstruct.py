@@ -62,7 +62,7 @@ def build_graph(network, hashmap, roots, data, sid=-1, eid=-1):
         build_graph(network, hashmap, roots, data, endid+1, eid)
 
 
-def write_callgrind(network, f, selfcost, node_start="root", node_name='MAIN::MAIN', depth=0):
+def write_callgrind(network, f, selfcost, node_start="root", node_name=None, depth=0):
 
     def ch(x, y): return x + '::' + y if len(y) > 0 else x
 
@@ -74,27 +74,21 @@ def write_callgrind(network, f, selfcost, node_start="root", node_name='MAIN::MA
 
     # write header information
     if depth == 0:
-        main_dt = network.get_edge_data(
-            'root', 0)['attr_dict']['dt_us'][0] * 1000
         f.write('events: dt')
         f.write('\nfl={}\n'.format(ch('Task', '')))
         f.write('fn={}\n'.format(ch('Task', 'Task')))
-        f.write('{} {}\n'.format(1, int(selfcost - main_dt)))  # self cost
-        f.write('cfl={}\n'.format(ch('MAIN', '')))
-        f.write('cfn={}\n'.format(ch('MAIN', 'MAIN')))
-        f.write('calls={} {}\n'.format(1, 1))
-        f.write('{} {}\n'.format(0, int(main_dt)))  # cost of main prg
-        selfcost = main_dt
+        f.write('{} {}\n'.format(1, int(selfcost)))  # self cost
 
     # calculate self costs by substracting the costs of all calls
     for _, n in enumerate(network.neighbors(node_start)):
         for dt_us in network.get_edge_data(node_start, n)['attr_dict']['dt_us']:
             selfcost -= int(dt_us*1000)
 
-    node_fb, node_method = node_name.split('::')
-    f.write('\nfl={}\n'.format(ch(node_fb, '')))
-    f.write('fn={}\n'.format(ch(node_fb, node_method)))
-    f.write('{} {}\n'.format(1, selfcost))
+    if node_name is not None:
+        node_fb, node_method = node_name.split('::')
+        f.write('\nfl={}\n'.format(ch(node_fb, '')))
+        f.write('fn={}\n'.format(ch(node_fb, node_method)))
+        f.write('{} {}\n'.format(1, selfcost))
     for i, n in enumerate(network.neighbors(node_start)):
         fb, method = network.get_edge_data(
             node_start, n)['attr_dict']['name'].split('::')
