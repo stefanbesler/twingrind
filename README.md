@@ -145,8 +145,6 @@ captured cycles. The command comes with some arguments to control its behavior, 
 
 In the images below the first one shows the overview over a complete cycle. The PLC that I was running when taking this picture didn't us a lot of cpu ticks that is why there is a lot of empty space in *CYCLE::CYCLE*. The second image is zoomed into the MAIN PRG.
 
-In the images below the first one shows the overview over a complete cycle. The PLC that I was running when taking this picture didn't us a lot of cpu ticks that is why there is a lot of empty space in *CYCLE::CYCLE*. The second image is zoomed into the MAIN PRG.
-
 <p align="center">
   <img src="images/demo3.png" alt="Callgrind demo" height="200px"/>&emsp;
   <img src="images/demo4.png" alt="Callgrind demo" height="200px"/>  
