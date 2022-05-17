@@ -1,0 +1,25 @@
+{
+  "fileversion": 1,
+  "solution": "Twingrind/Twingrind.sln",
+  "projects": [
+    {
+      "name": "Twingrind",
+      "plcs": [
+        {
+          "version": "0.2.0.0",
+          "name": "Twingrind",
+          "type": "Library",
+          "frameworks": {},
+          "references": {
+            "*": [
+              "Tc2_Standard=*",
+              "Tc2_System=*"
+            ]
+          },
+          "repositories": [],
+          "bindings": {}
+        }
+      ]
+    }
+  ]
+}
