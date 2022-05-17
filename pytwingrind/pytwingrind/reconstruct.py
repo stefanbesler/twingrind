@@ -59,7 +59,7 @@ def build_graph(network, hashmap, roots, data, sid=-1, eid=-1):
         build_graph(network, hashmap, roots + [sid], data, sid+1, endid)
 
     if(endid+1 < len(data)) and endid+1 != eid:
-        build_graph(network, hashmap, roots, data, endid+1, eid, True)
+        build_graph(network, hashmap, roots, data, endid+1, eid)
 
 
 def write_callgrind(network, f, selfcost, node_start="root", node_name='MAIN::MAIN', depth=0):
