@@ -115,18 +115,18 @@ def write_callgrind(network, f, selfcost, node_start="root", node_name='MAIN::MA
                         node_start=n, node_name=n_name, depth=depth+1)
 
 
-def run(hashmap: str, callstack: str, dest: str, cycletime: float):
-    logging.info(f"Reconstructing callstack {callstack}")
-    stack = pickle.load(open(callstack, 'rb'))
+def run(hashmap: str, file: str, dest: str):
+    logging.info(f"Reconstructing callstack {file}")
+    callstack = pickle.load(open(file, 'rb'))
     hm = pickle.load(open(hashmap, 'rb'))
 
-    data = extract_stack(stack, hm)
+    data = extract_stack(callstack.stack, hm)
     n = networkx.DiGraph()
     build_graph(n, hm, ['root'], data)
 
     logging.info(f'Reconstructed {int(len(data) / 2)} calls')
     filename = os.path.join(
-        dest, 'callgrind.{}'.format(os.path.basename(callstack)))
+        dest, 'callgrind.{}'.format(os.path.basename(file)))
     with open(filename, 'wt') as f:
-        write_callgrind(n, f, int(cycletime * 1000000))
+        write_callgrind(n, f, int(callstack.cycletime * 100))
         logging.info(f'Reconstructed callgrind file to {filename}')

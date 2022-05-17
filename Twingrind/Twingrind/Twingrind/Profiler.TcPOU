@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.9">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="Profiler" Id="{b9b8f223-2122-4b0c-bf7b-2e173ae50fad}" SpecialFunc="None">
-    <Declaration><![CDATA[PROGRAM Profiler
+    <Declaration><![CDATA[{attribute 'hide_all_locals'}
+PROGRAM Profiler
 VAR_INPUT
   CaptureOnce : BOOL; //< On rising edge, starts to one frame
   CaptureContinuous : BOOL; //<  If set record until all frames are filled up, [MAX_FRAMES](xref:Profiler.ParameterList#MAX_FRAMES) controls how many frames are recorded. If all frames are recorded, the flag is reset
@@ -13,34 +14,28 @@ VAR_OUTPUT
   Error : BOOL;
   ErrorMessage : STRING;
   FrameIndex : SINT;  
-  Stacks : ARRAY [0..ParameterList.MAX_FRAMES] OF DINT;  
-  Frames : ARRAY [0..ParameterList.MAX_FRAMES] OF ARRAY[0..ParameterList.MAX_STACKSIZE] OF ProfilerStackStruct;  
+  Stacks : ARRAY [0..ParameterList.MAX_FRAMES] OF DINT;
+  Frames : ARRAY [0..ParameterList.MAX_FRAMES, 1..MAX_TASKS] OF ARRAY[0..ParameterList.MAX_STACKSIZE] OF ProfilerStackStruct;
+  CycleTime : ARRAY [1..MAX_TASKS] OF UDINT; //< Cycletime for every task in 100ns
+  Tasks : SINT;
 END_VAR
 VAR
-  {attribute 'hide'}
   _size : DINT;
-  {attribute 'hide'}
   _stacksize : REFERENCE TO DINT REF= Stacks[0];
-  {attribute 'hide'}
-  _stack : REFERENCE TO ARRAY[0..ParameterList.MAX_STACKSIZE] OF ProfilerStackStruct REF= Frames[0];
-  {attribute 'hide'}
+  _stack : REFERENCE TO ARRAY[0..ParameterList.MAX_STACKSIZE] OF ProfilerStackStruct REF= Frames[0, 1];
   _cpuCounter : GETCPUCOUNTER;
-  {attribute 'hide'}
   _currenttask : GETCURTASKINDEX;
-  {attribute 'hide'}
   _enabled : BOOL;
-  {attribute 'hide'}
   _depth : DINT := 0;
-  {attribute 'hide'}
   _frameRecorded : F_TRIG;
-  {attribute 'hide'}
   _captureOnceTrig : R_TRIG;
-  {attribute 'hide'}
   _captureContinuousTrig : R_TRIG;
-  {attribute 'hide'}
   _resetTrig : R_TRIG;
-  {attribute 'hide'}
-  _i : SINT;  
+  _i : SINT;
+  _taskIt : UDINT;
+END_VAR
+VAR CONSTANT
+  MAX_TASKS : SINT:=1;
 END_VAR
 
 ]]></Declaration>
@@ -50,6 +45,22 @@ _frameRecorded(CLK:=_enabled);
 _captureOnceTrig(CLK:=CaptureOnce);
 _resetTrig(CLK:=Reset);
 _captureContinuousTrig(CLK:=CaptureContinuous);
+
+IF _taskIt < 1
+THEN
+  IF TwinCAT_SystemInfoVarList._AppInfo.TaskCnt > SINT_TO_UDINT(MAX_TASKS)
+  THEN
+    Error := TRUE;
+    ErrorMessage := 'Twingrind only supports PLCs with 1 tasks only!';
+    RETURN;
+	END_IF
+  
+  Tasks := UDINT_TO_SINT(TwinCAT_SystemInfoVarList._AppInfo.TaskCnt);
+  FOR _taskIt:=1 TO TwinCAT_SystemInfoVarList._AppInfo.TaskCnt
+  DO
+    CycleTime[_taskIt] := TwinCAT_SystemInfoVarList._TaskInfo[_taskIt].CycleTime;
+	END_FOR
+END_IF
 
 IF _captureContinuousTrig.Q
 THEN
@@ -99,7 +110,7 @@ END_IF
 
 Busy := _enabled;
 _depth := 0;
-_stack REF= Frames[FrameIndex];
+_stack REF= Frames[FrameIndex, 1];
 _stacksize REF= Stacks[FrameIndex];
 _frameRecorded(CLK:=_enabled);]]></ST>
     </Implementation>
