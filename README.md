@@ -109,11 +109,10 @@ The *process* command is a shortcut for *fetch* and then *reconstruct* every sna
 that you want to work with.
 
 ```
-twingrind process -m hashmap -t 1
+twingrind process -m hashmap
 ```
 
-Here `-m hashmap` refers to the hashmap that has been created for your PLC during preparation. `-t 1` means that the cycletime of your PLC
-is *1ms*. Adapt these parameters accordingly to your setup, use `twingrind process -h` for a detailed listing of all arguments.
+Here `-m hashmap` refers to the hashmap that has been created for your PLC during preparation. Use `twingrind process -h` for a detailed listing of all arguments.
 
 ### Take snapshot
 
