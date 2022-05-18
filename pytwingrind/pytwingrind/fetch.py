@@ -27,10 +27,7 @@ def run(netid: str, port: int, directory: str):
     tasks = {tasks}
     frames = {frames}""")
 
-    # create global class to keep pickle happy
-    global Stack
-    class Stack(ctypes.Structure):
-        _fields_ = [("calls", common.Call * (max_stacksize))]
+    common.create_stack_class(max_stacksize)
     
     for task in range(1, tasks+1):
 
@@ -43,10 +40,10 @@ def run(netid: str, port: int, directory: str):
           if stacksize == 0:
             continue
             
-          stack = plc.read_by_name(f"Profiler.Frames[{frame}, {task}]", Stack)
+          stack = plc.read_by_name(f"Profiler.Frames[{frame}, {task}]", common.Stack)
           path = os.path.join(directory, f"callstack_frame_{frame}_task_{task}")
           callstacks.append(path)
-          pickle.dump(common.Callstack(cycletime=cycletime, task=task, stack=stack), open(callstacks[-1], "wb"))
+          pickle.dump(common.Callstack(cycletime=cycletime, task=task, max_stacksize=max_stacksize, stack=stack), open(callstacks[-1], "wb"))
           logging.info(f"Fetched Callstack {frame} (Task {task}) with calls {int(stacksize/2)} to {path}")
 
   except pyads.ADSError as e:

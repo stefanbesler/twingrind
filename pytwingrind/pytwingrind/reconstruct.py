@@ -2,8 +2,11 @@ import os
 import logging
 import glob
 import pickle
+import inspect
 import networkx
 import numpy as np
+import ctypes
+from pytwingrind import common
 from enum import IntEnum
 from pytwingrind.common import Call
 
@@ -110,8 +113,21 @@ def write_callgrind(network, f, selfcost, node_start="root", node_name=None, dep
 
 
 def run(hashmap: str, file: str, dest: str):
+
     logging.info(f"Reconstructing callstack {file}")
+    
+    # unpickling is tricky if the Stack class does not exist yet. The latter
+    # occurs if we use 'twingrind reconstruct' instead of 'twingrind process'.
+    # Lets create a "wrong" Stack class that can only hold 1 call, then use
+    # load the file and use the max_stacksize, which is stored there, to create
+    # the correct Stack class
+    common.create_stack_class(1)
     callstack = pickle.load(open(file, 'rb'))
+    common.create_stack_class(callstack.max_stacksize)
+    callstack = pickle.load(open(file, 'rb'))
+    
+    logging.debug(f"Callstack max_stack={callstack.max_stacksize}")
+    
     hm = pickle.load(open(hashmap, 'rb'))
 
     data = extract_stack(callstack.stack, hm)
