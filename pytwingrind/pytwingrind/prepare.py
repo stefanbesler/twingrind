@@ -27,13 +27,14 @@ def find_files(filepath):
             if re_source:
                 yield os.path.join(subdir, f)
 
+
 def add_guards(filepath, fb_name, hashes):
     """add guards to fb and all methods for this file"""
 
     src = ""
     
     try:
-        with open(filepath, "rt", encoding=common.detect_encoding(filepath)) as f:
+        with open(filepath, "rt") as f:
             src = f.read()
             if common.profiler_tag in src:
                 logging.warning("Profiler guards seem already present in {}, skipping".format(fb_name))
@@ -75,38 +76,7 @@ def add_guards(filepath, fb_name, hashes):
                                                                                           spacer3=m[3],
                                                                                           body=body,
                                                                                           fb=fb_name))
-
-    # add guards to programs
-    programs = re.findall(r'<POU(.*?)Name="(.*?)"(.*?)PROGRAM(.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
-    if programs:
-        for m in programs:
-            prg_name = m[1]
-            body = m[4]
-            old_body = copy.deepcopy(body)
-            hash = create_hash(fb_name, prg_name, hashes)
-
-            body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
-            body, i = re.subn(r'RETURN([\s]*?);',
-                              r'''\1{tag}Twingrind.Profiler.Pop({hash}); {tag}\1RETURN;'''.format(hash=hash, tag=common.profiler_tag),
-                              body, 0, re.S | re.M | re.UNICODE)
-            body = body + '''\n{tag}Twingrind.Profiler.Pop({hash});{tag}'''.format(hash=hash, tag=common.profiler_tag)
-
-            nearly += i # two guards are always added
-            ncallables += 1
-
-            src = src.replace(r'<POU{spacer0}Name="{prg_name}"{spacer2}PROGRAM{spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
-                                                                                          prg_name=prg_name,
-                                                                                          spacer2=m[2],
-                                                                                          spacer3=m[3],
-                                                                                          body=old_body,
-                                                                                          fb=fb_name),
-                              r'<POU{spacer0}Name="{prg_name}"{spacer2}PROGRAM{spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
-                                                                                          prg_name=prg_name,
-                                                                                          spacer2=m[2],
-                                                                                          spacer3=m[3],
-                                                                                          body=body,
-                                                                                          fb=fb_name))
-
+                                                                                          
     # add guards to function blocks
     functionblocks = re.findall(r'<POU(.*?)Name="(.*?)"(.*?)FUNCTION_BLOCK(.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
     if functionblocks:
@@ -172,7 +142,7 @@ def add_guards(filepath, fb_name, hashes):
 
     logging.debug("{}: guards added in {} methods, contains ({} returns)".format(fb_name, ncallables, nearly+1))
 
-    with open(filepath, "wt", encoding=common.detect_encoding(filepath)) as g:
+    with open(filepath, "wt") as g:
         g.write(src)
 
 
@@ -186,6 +156,9 @@ def run(filepath : str, hashmap : str):
     except:
         logging.info('Creating a new hashfile')
 
+    main_hash = 0 # hash for main.prg is fixed to 0
+    hashes[main_hash] = ('MAIN', 'MAIN')
+
     for f in find_files(filepath):
         fb_name, _ = os.path.splitext(os.path.basename(f))
         add_guards(f, fb_name, hashes)
@@ -193,15 +166,14 @@ def run(filepath : str, hashmap : str):
     pickle.dump(hashes, open(hashmap, "wb"))
     print('Hashmap location={}'.format(hashmap))
     print('Containing {} hashes'.format(len(hashes)))
-    print('Do not forget to call Twingrind.Profiler() in the  *first line* of the *first PRG* in the PLC task!')
+    print('Do not forget to add the boilerplate code with hash=0 in your MAIN.PRG'.format(main_hash))
     print('''
-MAIN.PRG
+MAIN:PRG
 -------------------------------
-1 Twingrind.Profiler();
-2
-3 // <Already existing source code here>
-4 // <Already existing source code here>
-5 // <Already existing source code here>
-.
-.
+Twingrind.Profiler();
+Twingrind.Profiler.Push(0);
+
+// <Already existing source code here>
+
+Twingrind.Profiler.Pop(0);
 ''')

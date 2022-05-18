@@ -1,14 +1,5 @@
 import ctypes
-import chardet
 profiler_tag = r"(* @@ PROFILER @@ *)"
-
-def detect_encoding(filepath : str):
-  
-    with open(filepath, 'rb') as f:
-      result = chardet.detect(f.read())
-      return result['encoding']
-    
-    return 'utf-8'
 
 def find_sourcefiles(filepath : str):
     """walk recursively through folders and look for TwinCat3 source files"""
@@ -26,9 +17,6 @@ class Call(ctypes.Structure):
                 ("starthi", ctypes.c_uint32),
                 ("endlo", ctypes.c_uint32),
                 ("endhi", ctypes.c_uint32)]
-                
-class Callstack(object):
-    def __init__(self, cycletime : int, task : int, stack : ctypes.Structure):
-        self.cycletime = cycletime
-        self.task = task
-        self.stack = stack
+
+class Stack(ctypes.Structure):
+    _fields_ = [("calls", Call * (320000))]

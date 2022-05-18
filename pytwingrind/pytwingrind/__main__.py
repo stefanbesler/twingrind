@@ -24,6 +24,7 @@ hashmap that has been created for the PLC with the prepare command, to the callg
 reconstruct_parser.add_argument("-m", "--hashmap", help="Hashmap that is created with the prepare command", required=True)
 reconstruct_parser.add_argument("-c", "--callstack", help="Callstack that was read out with the fetch command", required=True)
 reconstruct_parser.add_argument("-d", "--directory", help="Output directory", default="./", required=False)
+reconstruct_parser.add_argument("-t", "--cycletime", help="PLC cycletime in milliseconds", default=1, required=True)
 reconstruct_parser.add_argument("-q", "--masquarade", help="Obfuscate names of functionblocks, functions and methods", action="store_true", required=False) 
 
 process_parser = ArgumentParser("""Fetches all captures from the PLC and then reconstructs the call-graph. This command
@@ -32,6 +33,7 @@ process_parser.add_argument("-n", "--netid", help="AMS-NetId of the target machi
 process_parser.add_argument("-p", "--port", help="Port of the PLC", default=851, required=False)
 process_parser.add_argument("-d", "--directory", help="Output directory", default="./", required=False)
 process_parser.add_argument("-m", "--hashmap", help="Hashmap that is created with the prepare command", required=True)
+process_parser.add_argument("-t", "--cycletime", help="PLC cycletime in milliseconds", default=1, required=True)
 process_parser.add_argument("-q", "--masquarade", help="Obfuscate names of functionblocks, functions and methods", action="store_true", required=False) 
    
 clean_parser = ArgumentParser("""Removes all boilerplate code that has been added the PLC with the prepare command.
@@ -60,7 +62,7 @@ def main():
   elif arg == "reconstruct":
     parser = reconstruct_parser
     args = vars(parser.parse_args(sys.argv[2::]))
-    pytwingrind.reconstruct.run(args["hashmap"], args["callstack"], args["directory"])
+    pytwingrind.reconstruct.run(args["hashmap"], args["callstack"], args["directory"], float(args["cycletime"]))
  
   elif arg == "process":
     parser = process_parser
@@ -68,7 +70,7 @@ def main():
     callstacks = pytwingrind.fetch.run(args["netid"], int(args["port"]), args["directory"])
     
     for callstack in callstacks:
-      pytwingrind.reconstruct.run(args["hashmap"], callstack, args["directory"])
+      pytwingrind.reconstruct.run(args["hashmap"], callstack, args["directory"], float(args["cycletime"]))
     
   elif arg == "clean":
     parser = clean_parser
