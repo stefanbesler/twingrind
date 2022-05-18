@@ -1,5 +1,14 @@
 import ctypes
+import chardet
 profiler_tag = r"(* @@ PROFILER @@ *)"
+
+def detect_encoding(filepath : str):
+  
+    with open(filepath, 'rb') as f:
+      result = chardet.detect(f.read())
+      return result['encoding']
+    
+    return 'utf-8'
 
 def find_sourcefiles(filepath : str):
     """walk recursively through folders and look for TwinCat3 source files"""
@@ -17,6 +26,16 @@ class Call(ctypes.Structure):
                 ("starthi", ctypes.c_uint32),
                 ("endlo", ctypes.c_uint32),
                 ("endhi", ctypes.c_uint32)]
-
-class Stack(ctypes.Structure):
-    _fields_ = [("calls", Call * (320000))]
+                
+def create_stack_class(max_stacksize : int):
+    # create global class to keep pickle happy
+    global Stack
+    class Stack(ctypes.Structure):
+        _fields_ = [("calls", Call * (max_stacksize))]
+                
+class Callstack(object):
+    def __init__(self, cycletime : int, task : int, max_stacksize : int, stack : ctypes.Structure):
+        self.cycletime = cycletime
+        self.task = task
+        self.max_stacksize = max_stacksize
+        self.stack = stack
