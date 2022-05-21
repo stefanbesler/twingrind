@@ -1,6 +1,5 @@
 import os
 import logging
-import glob
 import pickle
 import inspect
 import networkx
@@ -73,7 +72,7 @@ def write_callgrind(network, f, selfcost, node_start="root", node_name=None, dep
     if selfcost < 0 and depth == 0:
         selfcost = 1000000000
     elif selfcost < 0:
-        raise Expection('selfcost < 0')
+        raise Exception('selfcost < 0')
 
     # write header information
     if depth == 0:
