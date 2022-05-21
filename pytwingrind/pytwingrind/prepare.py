@@ -66,14 +66,12 @@ def add_guards(filepath, fb_name, hashes):
                                                                                           function_name=function_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=old_body,
-                                                                                          fb=fb_name),
+                                                                                          body=old_body),
                               r'<POU{spacer0}Name="{function_name}"{spacer2} FUNCTION {spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
                                                                                           function_name=function_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=body,
-                                                                                          fb=fb_name))
+                                                                                          body=body))
 
     # add guards to programs
     programs = re.findall(r'<POU(.*?)Name="(.*?)"(.*?)PROGRAM(.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
@@ -97,14 +95,12 @@ def add_guards(filepath, fb_name, hashes):
                                                                                           prg_name=prg_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=old_body,
-                                                                                          fb=fb_name),
+                                                                                          body=old_body),
                               r'<POU{spacer0}Name="{prg_name}"{spacer2}PROGRAM{spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
                                                                                           prg_name=prg_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=body,
-                                                                                          fb=fb_name))
+                                                                                          body=body))
 
     # add guards to function blocks
     functionblocks = re.findall(r'<POU(.*?)Name="(.*?)"(.*?)FUNCTION_BLOCK(.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
@@ -128,14 +124,12 @@ def add_guards(filepath, fb_name, hashes):
                                                                                           functionblock_name=functionblock_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=old_body,
-                                                                                          fb=fb_name),
+                                                                                          body=old_body),
                               r'<POU{spacer0}Name="{functionblock_name}"{spacer2}FUNCTION_BLOCK{spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
                                                                                           functionblock_name=functionblock_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=body,
-                                                                                          fb=fb_name))
+                                                                                          body=body))
 
     # add guards to all methods
     methods = re.findall(r'<Method(.*?)Name="(.*?)"(.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
