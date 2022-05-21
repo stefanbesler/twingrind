@@ -5,7 +5,6 @@ import os
 import re
 import logging
 import pickle
-import copy
 from pytwingrind import common
 
 def create_hash(fb, method, hashes):
@@ -51,7 +50,7 @@ def add_guards(filepath, fb_name, hashes):
         for m in functions:
             function_name = m[1]
             body = m[4]
-            old_body = copy.deepcopy(body)
+            old_body = body
             hash = create_hash(fb_name, function_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
@@ -82,7 +81,7 @@ def add_guards(filepath, fb_name, hashes):
         for m in programs:
             prg_name = m[1]
             body = m[4]
-            old_body = copy.deepcopy(body)
+            old_body = body
             hash = create_hash(fb_name, prg_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
@@ -113,7 +112,7 @@ def add_guards(filepath, fb_name, hashes):
         for m in functionblocks:
             functionblock_name = m[1]
             body = m[4]
-            old_body = copy.deepcopy(body)
+            old_body = body
             hash = create_hash(fb_name, functionblock_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
@@ -147,7 +146,7 @@ def add_guards(filepath, fb_name, hashes):
             
             method_name = m[1]
             body = m[3]
-            old_body = copy.deepcopy(body)
+            old_body = body
             hash = create_hash(fb_name, method_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
