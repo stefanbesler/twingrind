@@ -45,7 +45,7 @@ def add_guards(filepath, fb_name, hashes):
     ncallables = 0
     
     # add guards to functions
-    functions = re.findall(r'<POU(.*?)Name="(.*?)"(.*?) FUNCTION (.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
+    functions = re.findall(r'<POU(.*?)Name="(.*?)"(.*?)FUNCTION (.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
     if functions:
         for m in functions:
             function_name = m[1]
@@ -62,12 +62,12 @@ def add_guards(filepath, fb_name, hashes):
             nearly += i # two guards are always added
             ncallables += 1
 
-            src = src.replace(r'<POU{spacer0}Name="{function_name}"{spacer2} FUNCTION {spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
+            src = src.replace(r'<POU{spacer0}Name="{function_name}"{spacer2}FUNCTION {spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
                                                                                           function_name=function_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
                                                                                           body=old_body),
-                              r'<POU{spacer0}Name="{function_name}"{spacer2} FUNCTION {spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
+                              r'<POU{spacer0}Name="{function_name}"{spacer2}FUNCTION {spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
                                                                                           function_name=function_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
