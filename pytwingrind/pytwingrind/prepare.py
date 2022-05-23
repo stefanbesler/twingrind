@@ -5,7 +5,6 @@ import os
 import re
 import logging
 import pickle
-import copy
 from pytwingrind import common
 
 def create_hash(fb, method, hashes):
@@ -46,12 +45,12 @@ def add_guards(filepath, fb_name, hashes):
     ncallables = 0
     
     # add guards to functions
-    functions = re.findall(r'<POU(.*?)Name="(.*?)"(.*?) FUNCTION (.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
+    functions = re.findall(r'<POU(.*?)Name="(.*?)"(.*?)FUNCTION (.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
     if functions:
         for m in functions:
             function_name = m[1]
             body = m[4]
-            old_body = copy.deepcopy(body)
+            old_body = body
             hash = create_hash(fb_name, function_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
@@ -63,18 +62,16 @@ def add_guards(filepath, fb_name, hashes):
             nearly += i # two guards are always added
             ncallables += 1
 
-            src = src.replace(r'<POU{spacer0}Name="{function_name}"{spacer2} FUNCTION {spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
+            src = src.replace(r'<POU{spacer0}Name="{function_name}"{spacer2}FUNCTION {spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
                                                                                           function_name=function_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=old_body,
-                                                                                          fb=fb_name),
-                              r'<POU{spacer0}Name="{function_name}"{spacer2} FUNCTION {spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
+                                                                                          body=old_body),
+                              r'<POU{spacer0}Name="{function_name}"{spacer2}FUNCTION {spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
                                                                                           function_name=function_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=body,
-                                                                                          fb=fb_name))
+                                                                                          body=body))
 
     # add guards to programs
     programs = re.findall(r'<POU(.*?)Name="(.*?)"(.*?)PROGRAM(.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
@@ -82,7 +79,7 @@ def add_guards(filepath, fb_name, hashes):
         for m in programs:
             prg_name = m[1]
             body = m[4]
-            old_body = copy.deepcopy(body)
+            old_body = body
             hash = create_hash(fb_name, prg_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
@@ -98,14 +95,12 @@ def add_guards(filepath, fb_name, hashes):
                                                                                           prg_name=prg_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=old_body,
-                                                                                          fb=fb_name),
+                                                                                          body=old_body),
                               r'<POU{spacer0}Name="{prg_name}"{spacer2}PROGRAM{spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
                                                                                           prg_name=prg_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=body,
-                                                                                          fb=fb_name))
+                                                                                          body=body))
 
     # add guards to function blocks
     functionblocks = re.findall(r'<POU(.*?)Name="(.*?)"(.*?)FUNCTION_BLOCK(.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
@@ -113,7 +108,7 @@ def add_guards(filepath, fb_name, hashes):
         for m in functionblocks:
             functionblock_name = m[1]
             body = m[4]
-            old_body = copy.deepcopy(body)
+            old_body = body
             hash = create_hash(fb_name, functionblock_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
@@ -129,14 +124,12 @@ def add_guards(filepath, fb_name, hashes):
                                                                                           functionblock_name=functionblock_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=old_body,
-                                                                                          fb=fb_name),
+                                                                                          body=old_body),
                               r'<POU{spacer0}Name="{functionblock_name}"{spacer2}FUNCTION_BLOCK{spacer3}<ST><![CDATA[{body}]]></ST>'.format(spacer0=m[0],
                                                                                           functionblock_name=functionblock_name,
                                                                                           spacer2=m[2],
                                                                                           spacer3=m[3],
-                                                                                          body=body,
-                                                                                          fb=fb_name))
+                                                                                          body=body))
 
     # add guards to all methods
     methods = re.findall(r'<Method(.*?)Name="(.*?)"(.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
@@ -147,7 +140,7 @@ def add_guards(filepath, fb_name, hashes):
             
             method_name = m[1]
             body = m[3]
-            old_body = copy.deepcopy(body)
+            old_body = body
             hash = create_hash(fb_name, method_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
