@@ -7,6 +7,7 @@ from pytwingrind import common
 
 def run(netid: str, port: int, directory: str):
   callstacks = []
+  is_capturing = False
   logging.info(f"Connecting {netid}:{port}")
   if netid == "":
     pyads.ads.open_port()
@@ -17,39 +18,51 @@ def run(netid: str, port: int, directory: str):
   try:
     plc.open()
     
+    # step capturing
+    is_capturing = plc.read_by_name(f"Profiler.CaptureContinuous", pyads.PLCTYPE_BOOL)
+    
+    if is_capturing:
+      plc.write_by_name(f"Profiler.CaptureContinuous", False, pyads.PLCTYPE_BOOL)
+      logging.info(f"Capturing paused")
+      
     # get header data
     tasks = plc.read_by_name('Profiler.Tasks', pyads.PLCTYPE_SINT)
-    max_stacksize = plc.read_by_name('ParameterList.MAX_STACKSIZE', pyads.PLCTYPE_DINT)     
-    frames = plc.read_by_name('Profiler.FrameIndex', pyads.PLCTYPE_BYTE)
+    max_stacksize = plc.read_by_name('ParameterList.MAX_STACKSIZE', pyads.PLCTYPE_DINT)
+    max_frames = plc.read_by_name('ParameterList.MAX_FRAMES', pyads.PLCTYPE_SINT)  
+    frameIndex = plc.read_by_name('Profiler.FrameIndex', pyads.PLCTYPE_BYTE)
     
     logging.info(f"""Fetching callstacks from PLC with
-    max_stacksize = {max_stacksize}        
-    tasks = {tasks}
-    frames = {frames}""")
+    max_stacksize = {max_stacksize}
+    max_frames = {max_frames}
+    tasks = {tasks}""")
 
     common.create_stack_class(max_stacksize)
-    
+    counter = 0
     for task in range(1, tasks+1):
-
         cycletime = plc.read_by_name(f"Profiler.CycleTime[{task}]", pyads.PLCTYPE_UDINT)
     
-        for frame in range(frames):
-          stacksize = plc.read_by_name(f"Profiler.Stacks[{frame}]", pyads.PLCTYPE_DINT)
+        for frame in range(max_frames):
+          stacksize = plc.read_by_name(f"Profiler.Meta[{frame}].Size", pyads.PLCTYPE_DINT)
 
           # abort if we don't get a valid stack out of it
-          if stacksize == 0:
-            continue
-            
-          stack = plc.read_by_name(f"Profiler.Frames[{frame}, {task}]", common.Stack)
-          path = os.path.join(directory, f"callstack_frame_{frame}_task_{task}")
-          callstacks.append(path)
-          pickle.dump(common.Callstack(cycletime=cycletime, task=task, max_stacksize=max_stacksize, stack=stack), open(callstacks[-1], "wb"))
-          logging.info(f"Fetched Callstack {frame} (Task {task}) with calls {int(stacksize/2)} to {path}")
+          if stacksize > 0 and frame != frameIndex:            
+            stack = plc.read_by_name(f"Profiler.Data[{frame}, {task}]", common.Stack)
+            path = os.path.join(directory, f"callstack_frame_{counter}_task_{task}")
+            callstacks.append(path)
+            pickle.dump(common.Callstack(cycletime=cycletime, task=task, size=stacksize, stack=stack), open(callstacks[-1], "wb"))
+            logging.info(f"Fetched Callstack {counter} (Task {task}) with calls {int(stacksize/2)} to {path}")
+            counter += 1
 
   except pyads.ADSError as e:
-      logging.error(e)
+    logging.error(e)
   finally:
-      plc.close()
+    try:
+      if is_capturing:
+        plc.write_by_name(f"Profiler.CaptureContinuous", True, pyads.PLCTYPE_BOOL)
+        logging.info(f"Capturing continued")
+    except:
+      pass
+    plc.close()
       
   return callstacks
 

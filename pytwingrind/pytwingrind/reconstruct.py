@@ -118,14 +118,14 @@ def run(hashmap: str, file: str, dest: str):
     # unpickling is tricky if the Stack class does not exist yet. The latter
     # occurs if we use 'twingrind reconstruct' instead of 'twingrind process'.
     # Lets create a "wrong" Stack class that can only hold 1 call, then use
-    # load the file and use the max_stacksize, which is stored there, to create
+    # load the file and use the size, which is stored there, to create
     # the correct Stack class
     common.create_stack_class(1)
     callstack = pickle.load(open(file, 'rb'))
-    common.create_stack_class(callstack.max_stacksize)
+    common.create_stack_class(callstack.size)
     callstack = pickle.load(open(file, 'rb'))
     
-    logging.debug(f"Callstack max_stack={callstack.max_stacksize}")
+    logging.debug(f"Callstack size={callstack.size}")
     
     hm = pickle.load(open(hashmap, 'rb'))
 

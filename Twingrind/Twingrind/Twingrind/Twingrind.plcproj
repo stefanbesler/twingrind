@@ -25,6 +25,9 @@
     <AssemblyName>MyApplication</AssemblyName>-->
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CaptureMode.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Profiler.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -32,7 +35,10 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="ProfilerStackStruct.TcDUT">
+    <Compile Include="FrameData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FrameMeta.TcDUT">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

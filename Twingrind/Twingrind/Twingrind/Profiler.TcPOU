@@ -6,7 +6,9 @@ PROGRAM Profiler
 VAR_INPUT
   CaptureOnce : BOOL; //< On rising edge, starts to one frame
   CaptureContinuous : BOOL; //<  If set record until all frames are filled up, [MAX_FRAMES](xref:Profiler.ParameterList#MAX_FRAMES) controls how many frames are recorded. If all frames are recorded, the flag is reset
-  CaptureCpuTimeThreshold : LREAL; //< In percent (0 - 100) to control which frames should be recorded
+  Mode : CaptureMode;
+  CaptureCpuTimeLowThreshold : LREAL; //< In percent (0 - 100) to controls the minimum cycletime that frame need to have in order to be recorded, if CaptureCpuTimeLowThreshold = CaptureCpuTimeHighThreshold = 0, all frame are recorded
+  CaptureCpuTimeHighThreshold : LREAL; //< In percent (0 - 100) to controls the maximum cycletime that frame need to have in order to be recorded  
   Reset : BOOL; //< On rising edge, deletes all recorded frames
 END_VAR
 VAR_OUTPUT
@@ -14,24 +16,26 @@ VAR_OUTPUT
   Error : BOOL;
   ErrorMessage : STRING;
   FrameIndex : SINT;  
-  Stacks : ARRAY [0..ParameterList.MAX_FRAMES] OF DINT;
-  Frames : ARRAY [0..ParameterList.MAX_FRAMES, 1..MAX_TASKS] OF ARRAY[0..ParameterList.MAX_STACKSIZE] OF ProfilerStackStruct;
+  Meta : ARRAY [0..ParameterList.MAX_FRAMES] OF FrameMeta;
+  Data : ARRAY [0..ParameterList.MAX_FRAMES, 1..MAX_TASKS] OF ARRAY[0..ParameterList.MAX_STACKSIZE] OF FrameData;
   CycleTime : ARRAY [1..MAX_TASKS] OF UDINT; //< Cycletime for every task in 100ns
   Tasks : SINT;
 END_VAR
 VAR
   _size : DINT;
-  _stacksize : REFERENCE TO DINT REF= Stacks[0];
-  _stack : REFERENCE TO ARRAY[0..ParameterList.MAX_STACKSIZE] OF ProfilerStackStruct REF= Frames[0, 1];
+  _meta : REFERENCE TO FrameMeta REF= Meta[0];
+  _data : REFERENCE TO ARRAY[0..ParameterList.MAX_STACKSIZE] OF FrameData REF= Data[0, 1];
   _cpuCounter : GETCPUCOUNTER;
   _currenttask : GETCURTASKINDEX;
+  _cycleDuration : LREAL; //< in percent
   _enabled : BOOL;
+  _maxDuration : LREAL;
   _depth : DINT := 0;
   _frameRecorded : F_TRIG;
   _captureOnceTrig : R_TRIG;
   _captureContinuousTrig : R_TRIG;
   _resetTrig : R_TRIG;
-  _i : SINT;
+  _i, _j : SINT;
   _taskIt : UDINT;
 END_VAR
 VAR CONSTANT
@@ -72,20 +76,22 @@ THEN
   ErrorMessage := '';
 END_IF
 
-FOR _i := (FrameIndex+1) TO ParameterList.MAX_FRAMES
-DO
-  Stacks[_i] := 0;
-END_FOR
-
-// discard frame if threshold is not met
+// Logic to only keep frames that satisfy the threshold conditions
 IF _frameRecorded.Q
 THEN
-  _stacksize := _size;
-  _currenttask();  
-  IF 100 * UDINT_TO_LREAL(TwinCAT_SystemInfoVarList._TaskInfo[_currenttask.index].LastExecTime) / UDINT_TO_LREAL(TwinCAT_SystemInfoVarList._TaskInfo[_currenttask.index].CycleTime) > CaptureCpuTimeThreshold
+  _meta.Size := _size;
+  _meta.TotalDuration := _data[_size-1].EndHi - _data[0].StartHi + _data[_size-1].EndLo - _data[0].StartLo;
+  _currenttask();
+  
+  // Check if the frame that was just recorded should be kept, if so, find the next place in the date structure where
+  // we can write into
+  _cycleDuration := 100 * UDINT_TO_LREAL(TwinCAT_SystemInfoVarList._TaskInfo[_currenttask.index].LastExecTime) / UDINT_TO_LREAL(TwinCAT_SystemInfoVarList._TaskInfo[_currenttask.index].CycleTime);
+  IF (_cycleDuration > CaptureCpuTimeLowThreshold AND_THEN _cycleDuration < CaptureCpuTimeHighThreshold) OR_ELSE 
+     (CaptureCpuTimeLowThreshold = 0 AND_THEN CaptureCpuTimeHighThreshold = 0)
   THEN
-    FrameIndex := MIN(FrameIndex + 1, ParameterList.MAX_FRAMES);
+    FrameIndex := NextFrameIndex();
   END_IF
+
 END_IF
 
 IF CaptureContinuous
@@ -102,21 +108,82 @@ ELSE
   END_IF 
 END_IF
 
+// Delete all Ddata that has already been caputured
 IF _resetTrig.Q
 THEN
   Error := FALSE;
   ErrorMessage := '';
   FrameIndex := 0;
-  _stacksize := 0;
+  MEMSET(ADR(Data), 0, SIZEOF(Data));
+  MEMSET(ADR(Meta), 0, SIZEOF(Meta));
   _enabled := FALSE;
 END_IF
 
+// Prepare the current frame
 Busy := _enabled;
 _depth := 0;
-_stack REF= Frames[FrameIndex, 1];
-_stacksize REF= Stacks[FrameIndex];
+_data REF= Data[FrameIndex, 1];
+_meta REF= Meta[FrameIndex];
+_meta.Id := TwinCAT_SystemInfoVarList._TaskInfo[1].CycleCount;
 _frameRecorded(CLK:=_enabled);]]></ST>
     </Implementation>
+    <Method Name="NextFrameIndex" Id="{8dd8eb4b-6627-47b8-aca6-2ccd3eea6ba1}">
+      <Declaration><![CDATA[METHOD INTERNAL NextFrameIndex : SINT
+VAR
+  i : SINT;
+  duration : LWORD;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE Mode
+OF
+  // Find the index of the fastest profile
+  CaptureMode.Slowest:
+    duration := 0;
+    FOR i:=0 TO ParameterList.MAX_FRAMES
+    DO
+      IF Meta[i].TotalDuration = 0
+      THEN
+        NextFrameIndex := i;
+        RETURN;
+      ELSIF Meta[i].TotalDuration < duration OR_ELSE duration = 0
+      THEN
+        duration := Meta[i].TotalDuration;
+        NextFrameIndex := i;
+      END_IF
+    END_FOR
+
+  // Record all frames, just get the next frame index
+  CaptureMode.All:
+    NextFrameIndex := FrameIndex + 1;
+    IF NextFrameIndex > ParameterList.MAX_FRAMES
+    THEN
+      NextFrameIndex := 0;
+    END_IF
+
+  // Find the index of the slowest profile
+  CaptureMode.Fastest:
+    duration := 0;
+    FOR i:=0 TO ParameterList.MAX_FRAMES
+    DO
+      IF Meta[i].TotalDuration = 0
+      THEN
+        NextFrameIndex := i;
+        RETURN;
+      ELSIF Meta[i].TotalDuration > duration OR_ELSE duration = 0
+      THEN
+        duration := Meta[i].TotalDuration;
+        NextFrameIndex := i;
+      END_IF
+    END_FOR
+
+  // Only record max_frames, then no further frames are caputured
+  CaptureMode.FirstOnesOnly:
+    NextFrameIndex := MIN(FrameIndex + 1, ParameterList.MAX_FRAMES);
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="Pop" Id="{859e770b-b663-4677-9ba3-3c5fe8fd4fc3}">
       <Declaration><![CDATA[METHOD Pop
 VAR_INPUT
@@ -129,11 +196,11 @@ THEN
 END_IF
 
 _depth := _depth - 1;
-_stack[_size].Depth := _depth;
-_stack[_size].Hash := hash;
-_stack[_size].StartHi := 0;
-_stack[_size].StartLo := 0;
-_cpuCounter(cpuCntLoDW => _stack[_size].EndLo, cpuCntHiDW => _stack[_size].EndHi);
+_data[_size].Depth := _depth;
+_data[_size].Hash := hash;
+_data[_size].StartHi := 0;
+_data[_size].StartLo := 0;
+_cpuCounter(cpuCntLoDW => _data[_size].EndLo, cpuCntHiDW => _data[_size].EndHi);
 
 IF _depth < 0
 THEN
@@ -167,11 +234,11 @@ THEN
   RETURN;
 END_IF
 
-_stack[_size].depth := _depth;
-_stack[_size].hash := hash;
-_cpuCounter(cpuCntLoDW => _stack[_size].StartLo, cpuCntHiDW => _stack[_size].StartHi);
-_stack[_size].endhi := 0;
-_stack[_size].endlo := 0;
+_data[_size].depth := _depth;
+_data[_size].hash := hash;
+_cpuCounter(cpuCntLoDW => _data[_size].StartLo, cpuCntHiDW => _data[_size].StartHi);
+_data[_size].endhi := 0;
+_data[_size].endlo := 0;
 _size := _size + 1;
 _depth := _depth + 1;
 

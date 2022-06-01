@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.9">
+  <DUT Name="FrameData" Id="{72c79013-bc38-4419-a5a6-7aa37877a660}">
+    <Declaration><![CDATA[TYPE INTERNAL FrameData :
+STRUCT
+  Hash : UDINT;
+  Depth : DINT;
+  StartLo : DWORD;
+  StartHi : DWORD;  
+  EndLo : DWORD;
+  EndHi : DWORD;  
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

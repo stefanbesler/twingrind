@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.9">
+  <DUT Name="FrameMeta" Id="{be0a15a5-1190-4803-b2b2-e0863c074c6c}">
+    <Declaration><![CDATA[TYPE INTERNAL FrameMeta :
+STRUCT
+  {attribute 'displaymode':='hex'}
+  Id : UDINT;
+  Size : DINT;
+  TotalDuration : LWORD; 
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

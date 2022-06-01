@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.9">
+  <DUT Name="CaptureMode" Id="{6db2358b-a479-4725-8115-ac4cfac42df8}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE CaptureMode :
+(
+	All, //< Capture all callstacks if the data array is full, old entries are overwritten
+  Fastest, //< Capture only the fastest callstacks, data of slower callstacks are overwritten
+  Slowest, //< Capture only the slowest callstacks, data of faster callstacks are overwritten
+  FirstOnesOnly //< Only capture callstacks until the data array is not completely full
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

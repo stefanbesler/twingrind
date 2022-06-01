@@ -2,22 +2,34 @@
 
 This project brings profiling to TwinCAT PLCs. The general idea of the implementation is as follows.
 1. Twingrind is a TwinCAT library that includes a program, which is used for profiling. It includes methods to built-up a callstack and some triggers to start profiling.
-1. prepare.py is a python script that is used to add profiling boilerplate code to your PLC.
-1. fetch.py can be used to read callstack from the PLC
-1. reconstruct.py is used to convert the recorded callstacks to callgrind (http://kcachegrind.sourceforge.net/html/CallgrindFormat.html)
+1. pytwingrind a python script that is used to 
+   - **prepare** add profiling boilerplate code to your PLC
+   - **fetch** callstacks from the PLC
+   - **reconstruct** the recorded callstacks to callgrind (http://kcachegrind.sourceforge.net/html/CallgrindFormat.html)
 
-The profile can then be visualized by [qcachegrind](http://kcachegrind.sourceforge.net/html/Home.html). What follows is a short instruction how to use the code that is provided in this repository for profiling your PLC. The following image shows a visualization of the callstack of a single PLC cycle - Methodnames have been obfuscated
+The callstack profile for individua PLC cycles can visualized by [qcachegrind](http://kcachegrind.sourceforge.net/html/Home.html). The following image shows a visualization of the callstack of a single PLC cycle - Methodnames have been obfuscated
 
 <p align="center">
   <img src="images/demo1.png" alt="Callgrind demo" height="200px"/>
 </p>
 
-The profiler can be set up to only capture callstacks of PLC cycles, which take "too long", which is adjustable by a threshold that is relative to the PLC cycletime. This feature is super handy for finding realtime violation issues where  the cycletime is exceeded.
+## Features
 
-The implementation is by no means feature complete and far from perfect. The core of the implementation was written way before TwinCAT offered any kind of profile mechanism, and I actually had the needs of a profile to find a serious problem in a PLC. Nowadays profiling for TwinCAT is offered by Beckhoff, but is of course attached with licencing fees and subpar visualization (my two cents). Twingrind instead uses a common fileformat for profiling and is free software. If you are interested to contribute to the project, feel free to write issues or fork the project and create pull requests. The current limitations of the profiler and the topics, which should be looked in, are as follows.
+- Profiling for TwinCAT PLCs without licencing costs
+- Selective capturing of callstacks (parametrizeable threshold to adjust which callstacks should be stored)
+- Continous profiling with the following modes
+  - Only keep the callstacks that took the longest. This feature is super handy for finding realtime violation issues where the cycletime is exceeded.
+  - Only keep the fastest callstacks
+  - Keep all callstacks, overwrite old callstacks in favour of new ones
+  - Do not overwrite callstacks, only keep the first X callstacks
+- Profiling of distinct cycles  
+
+The core of the implementation was written way before TwinCAT offered any kind of profile mechanism, and I actually had the needs of a profile to find a serious problem in a PLC. Nowadays profiling for TwinCAT is offered by Beckhoff, but is of course attached with licencing fees and subpar visualization (my two cents). Twingrind instead uses a common fileformat for profiling and is free software. If you are interested to contribute to the project, feel free to write issues or fork the project and create pull requests. The current limitations of the profiler and the topics, which should be looked in, are as follows.
 
 - [ ] Only PLCs that utilize exactly 1 task can be profiled.
 - [ ] Profiling itself adds some overhead to your code, which can not be avoided by this method, but maybe reduced by a fair bit.
+
+What follows is a short instruction how to use the code that is provided in this repository for profiling your PLC. 
 
 ## Backup
 

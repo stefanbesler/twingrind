@@ -27,15 +27,15 @@ class Call(ctypes.Structure):
                 ("endlo", ctypes.c_uint32),
                 ("endhi", ctypes.c_uint32)]
                 
-def create_stack_class(max_stacksize : int):
+def create_stack_class(size : int):
     # create global class to keep pickle happy
     global Stack
     class Stack(ctypes.Structure):
-        _fields_ = [("calls", Call * (max_stacksize))]
+        _fields_ = [("calls", Call * (size))]
                 
 class Callstack(object):
-    def __init__(self, cycletime : int, task : int, max_stacksize : int, stack : ctypes.Structure):
+    def __init__(self, cycletime : int, task : int, size : int, stack : ctypes.Structure):
         self.cycletime = cycletime
         self.task = task
-        self.max_stacksize = max_stacksize
+        self.size = size
         self.stack = stack
