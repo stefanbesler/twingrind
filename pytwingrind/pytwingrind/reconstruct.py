@@ -12,8 +12,8 @@ from pytwingrind.common import Call
 
 class StackRow(IntEnum):
     DEPTH = 0
-    START_US = 1
-    END_US = 2
+    START_100NS = 1
+    END_100NS = 2
     HASH = 3
 
 
@@ -23,8 +23,8 @@ def extract_stack(stack, hashmap):
     def hilo_to_lword(hi, lo): return ((hi << 32) + lo)
     
     for call in stack.calls:
-        data[size] = [call.depth, 0.1 * hilo_to_lword(
-            call.starthi, call.startlo), 0.1 * hilo_to_lword(call.endhi, call.endlo), call.hash]
+        data[size] = [call.depth, hilo_to_lword(
+            call.starthi, call.startlo), hilo_to_lword(call.endhi, call.endlo), call.hash]
 
         # no more valid timestamps
         if np.all(data[size] == 0):
@@ -43,7 +43,7 @@ def build_graph(network, hashmap, roots, data, sid=-1, eid=-1):
 
     endid = np.where(np.logical_and(data[sid+1:eid, StackRow.HASH] == data[sid, StackRow.HASH],
                      data[sid+1:eid, StackRow.DEPTH] == data[sid, StackRow.DEPTH]))[0][0] + sid + 1
-    dt_us = data[endid, StackRow.END_US] - data[sid, StackRow.START_US]
+    dt_100ns = data[endid, StackRow.END_100NS] - data[sid, StackRow.START_100NS]
     fb, method = hashmap[data[endid, StackRow.HASH]]
     depth = int(data[endid, StackRow.DEPTH])+1
 
@@ -52,11 +52,10 @@ def build_graph(network, hashmap, roots, data, sid=-1, eid=-1):
 
     if network.has_edge(parent, sid):
         network[parent][sid]['attr_dict']['calls'] += 1
-        network[parent][sid]['attr_dict']['dt_us'] += [dt_us, ]
+        network[parent][sid]['attr_dict']['dt_100ns'] += [dt_100ns, ]
     else:
         network.add_edge(parent, sid, attr_dict={
-                         'dt_us': [dt_us, ], 'calls': 1, 'name': '{}::{}'.format(fb, method)})
-
+                         'dt_100ns': [dt_100ns, ], 'calls': 1, 'name': '{}::{}'.format(fb, method)})
     if sid+1 != endid:
         build_graph(network, hashmap, roots + [sid], data, sid+1, endid)
 
@@ -83,8 +82,8 @@ def write_callgrind(network, f, selfcost, node_start="root", node_name=None, dep
 
     # calculate self costs by substracting the costs of all calls
     for _, n in enumerate(network.neighbors(node_start)):
-        for dt_us in network.get_edge_data(node_start, n)['attr_dict']['dt_us']:
-            selfcost -= int(dt_us*1000)
+        for dt_100ns in network.get_edge_data(node_start, n)['attr_dict']['dt_100ns']:
+            selfcost -= int(dt_100ns*100)
 
     if node_name is not None:
         node_fb, node_method = node_name.split('::')
@@ -96,18 +95,18 @@ def write_callgrind(network, f, selfcost, node_start="root", node_name=None, dep
             node_start, n)['attr_dict']['name'].split('::')
 
         calls = network.get_edge_data(node_start, n)['attr_dict']['calls']
-        dts = network.get_edge_data(node_start, n)['attr_dict']['dt_us']
+        dts = network.get_edge_data(node_start, n)['attr_dict']['dt_100ns']
 
         for c in range(calls):
             f.write('cfl={}\n'.format(ch(fb, '')))
             f.write('cfn={}\n'.format(ch(fb, method)))
             f.write('calls={} {}\n'.format(1, 1))
-            f.write('{} {}\n'.format(i, int(dts[c]*1000)))
+            f.write('{} {}\n'.format(i, int(dts[c]*100)))
 
     for i, n in enumerate(network.neighbors(node_start)):
-        dt_us = network.get_edge_data(node_start, n)['attr_dict']['dt_us']
+        dt_100ns = network.get_edge_data(node_start, n)['attr_dict']['dt_100ns']
         n_name = network.get_edge_data(node_start, n)['attr_dict']['name']
-        write_callgrind(network, f, selfcost=int(max(dt_us)*1000),
+        write_callgrind(network, f, selfcost=int(max(dt_100ns)*100),
                         node_start=n, node_name=n_name, depth=depth+1)
 
 
