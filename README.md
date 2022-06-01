@@ -109,8 +109,9 @@ You can now activate your PLC on your target and work as you are used to. Note t
 
 Then search for *Twingrind.Profiler* in the Watch panel and expand the node. You can then use the watch window to
 - **Capture the callstack** of a single frame of your PLC by a rising edge of *CaptureOnce*
-- Run **Captures continuously** by setting *CaptureContinuous=TRUE*. For this setting you can also specify a cpu time threshold such that only
-  frames with a certain percentage-based usage of your CPU are captured.
+- Run **Captures continuously** by setting *CaptureContinuous=TRUE*.
+  - You can specify a cpu time threshold such that only frames with a certain percentage-based usage of your CPU are captured (`CaptureCpuTimeLowThreshold`, `Capture CpuTimeHighThreshold`).
+  - You can use `Mode` to adjust which callstacks are stored by the Profiler. For instance setting `Mode=Slowest` will only keep the slowest callstacks in the storage.
 - The library includes a parameter *MAX_FRAMES*, which is used to adjust the maximum amount of recorded frames. If *FrameIndex=MAX_FRAMES* no 
   new captures will be performed by the Profiler. In order to **reset already taken recordings** you can give a rising edge on *Reset*. This will 
   internally remove all data and set *FrameIndex=0* again.
@@ -126,7 +127,7 @@ twingrind process -m hashmap
 
 Here `-m hashmap` refers to the hashmap that has been created for your PLC during preparation. Use `twingrind process -h` for a detailed listing of all arguments.
 
-### Take snapshot
+### Optional: Only read out profiling data from the PLC
 
 Run the following command to read out all data from your PLC. Note that recording has to be disabled before calling this issue. Disable
 continous capturing by setting *CaptureContinuous=FALSE* in the watch window and then call
@@ -142,7 +143,7 @@ and with the PLC that is running on port 851. However, the command has several a
 `twingrind fetch -h` for a detailed listing.
 
 
-### Convert snapshot
+### Optional: Convert previously read out data to callgrind
 
 Use the following command to reconstruct a frame.
 
