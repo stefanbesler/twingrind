@@ -5,7 +5,7 @@ import pickle
 import ctypes
 from pytwingrind import common
 
-def run(netid: str, port: int, directory: str):
+def run(netid: str, port: int, directory: str, outputname: str):
   callstacks = []
   is_capturing = False
   logging.info(f"Connecting {netid}:{port}")
@@ -47,7 +47,7 @@ def run(netid: str, port: int, directory: str):
           # abort if we don't get a valid stack out of it
           if stacksize > 0 and frame != frameIndex:            
             stack = plc.read_by_name(f"Profiler.Data[{frame}, {task}]", common.Stack)
-            path = os.path.join(directory, f"callstack_frame_{counter}_task_{task}")
+            path = os.path.join(directory, f"{outputname}_frame_{counter}_task_{task}")
             callstacks.append(path)
             pickle.dump(common.Callstack(cycletime=cycletime, task=task, size=stacksize, stack=stack), open(callstacks[-1], "wb"))
             logging.info(f"Fetched Callstack {counter} (Task {task}) with calls {int(stacksize/2)} to {path}")

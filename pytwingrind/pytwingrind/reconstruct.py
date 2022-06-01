@@ -110,7 +110,7 @@ def write_callgrind(network, f, selfcost, node_start="root", node_name=None, dep
                         node_start=n, node_name=n_name, depth=depth+1)
 
 
-def run(hashmap: str, file: str, dest: str):
+def run(hashmap: str, file: str, dest: str, outputname: str):
 
     logging.info(f"Reconstructing callstack {file}")
     
@@ -134,7 +134,7 @@ def run(hashmap: str, file: str, dest: str):
 
     logging.info(f'Reconstructed {int(len(data) / 2)} calls')
     filename = os.path.join(
-        dest, 'callgrind.{}'.format(os.path.basename(file)))
+        dest, f"callgrind.{outputname}{os.path.basename(file)}")
     with open(filename, 'wt') as f:
         write_callgrind(n, f, int(callstack.cycletime * 100))
         logging.info(f'Reconstructed callgrind file to {filename}')
