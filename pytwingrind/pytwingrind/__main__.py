@@ -1,6 +1,6 @@
 import sys
 import logging
-import pytwingrind.prepare, pytwingrind.fetch, pytwingrind.reconstruct
+import pytwingrind.prepare, pytwingrind.fetch, pytwingrind.reconstruct, pytwingrind.clean
 from argparse import ArgumentParser
 
 prepare_parser = ArgumentParser("""Prepares the source code of a PLC

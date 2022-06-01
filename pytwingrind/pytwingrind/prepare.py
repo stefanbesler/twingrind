@@ -17,15 +17,6 @@ def create_hash(fb, method, hashes):
             return h
         increment += 1
 
-def find_files(filepath):
-    """walk recursively through folders and look for TwinCat3 source files"""
-
-    for subdir, _, files in os.walk(filepath):
-        for f in files:
-            re_source = re.match(".*.tcpou$", f, re.I) 
-            if re_source:
-                yield os.path.join(subdir, f)
-
 def add_guards(filepath, fb_name, hashes):
     """add guards to fb and all methods for this file"""
 
@@ -113,7 +104,7 @@ def add_guards(filepath, fb_name, hashes):
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
             body, i = re.subn(r'RETURN([\s]*?);',
-                              r'''\1{tag}Twingrind.Profiler.Pop({hash}); {tag}\1RETURN;'''.format(hash=hash, tag=common.profiler_tag),
+                              r'''\1{tag}Twingrind.Profiler.Pop({hash}); {tag}RETURN\1;'''.format(hash=hash, tag=common.profiler_tag),
                               body, 0, re.S | re.M | re.UNICODE)
             body = body + '''\n{tag}Twingrind.Profiler.Pop({hash});{tag}'''.format(hash=hash, tag=common.profiler_tag)
 
@@ -179,7 +170,7 @@ def run(filepath : str, hashmap : str):
     except:
         logging.info('Creating a new hashfile')
 
-    for f in find_files(filepath):
+    for f in common.find_sourcefiles(filepath):
         fb_name, _ = os.path.splitext(os.path.basename(f))
         add_guards(f, fb_name, hashes)
 

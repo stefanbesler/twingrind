@@ -1,5 +1,7 @@
 import ctypes
 import chardet
+import os
+import re
 profiler_tag = r"(* @@ PROFILER @@ *)"
 
 def detect_encoding(filepath : str):
