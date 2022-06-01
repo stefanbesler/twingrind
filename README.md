@@ -1,13 +1,14 @@
 # Twingrind
 
-This project brings profiling to TwinCAT PLCs. The general idea of the implementation is as follows.
-1. Twingrind is a TwinCAT library that includes a program, which is used for profiling. It includes methods to built-up a callstack and some triggers to start profiling.
-1. pytwingrind a python script that is used to 
-   - **prepare** add profiling boilerplate code to your PLC
-   - **fetch** callstacks from the PLC
-   - **reconstruct** the recorded callstacks to callgrind (http://kcachegrind.sourceforge.net/html/CallgrindFormat.html)
+This project brings profiling to TwinCAT PLCs. The general idea of this project is as follows.
 
-The callstack profile for individua PLC cycles can visualized by [qcachegrind](http://kcachegrind.sourceforge.net/html/Home.html). The following image shows a visualization of the callstack of a single PLC cycle - Methodnames have been obfuscated
+1. Twingrind is a TwinCAT library that includes a program, which is used for profiling. It includes methods to built-up a callstack and some triggers to start profiling. To enable profiling for a PLC the library has to be added to your PLC and a call to the Profiler program it includes has to be made in the task that you want to profile.
+1. pytwingrind a python script that is used to 
+   - **prepare** your PLC for profile by adding some boilerplate code. This code are calls to `Push` and `Pop` methods of the Twincat library, which are needed to record the callstacks.
+   - **fetch** previously recorded callstacks from the PLC and store it as binary data on our PC. This is not necessarily where the PLC is running.
+   - **reconstruct** the recorded callstacks to callgrind (http://kcachegrind.sourceforge.net/html/CallgrindFormat.html) for visualization by [qcachegrind](http://kcachegrind.sourceforge.net/html/Home.html).
+   
+The following image shows a visualization of the callstack of a single PLC cycle - methodnames have been obfuscated
 
 <p align="center">
   <img src="images/demo1.png" alt="Callgrind demo" height="200px"/>
@@ -15,31 +16,32 @@ The callstack profile for individua PLC cycles can visualized by [qcachegrind](h
 
 ## Features
 
-- Profiling for TwinCAT PLCs without licencing costs
-- Selective capturing of callstacks (parametrizeable threshold to adjust which callstacks should be stored)
+- Profiling for TwinCAT PLCs with free software.
+- Selective capturing of callstacks. Threshold can be used to adjust which callstacks should be stored by the profiler.
 - Continous profiling with the following modes
-  - Only keep the callstacks that took the longest. This feature is super handy for finding realtime violation issues where the cycletime is exceeded.
-  - Only keep the fastest callstacks
-  - Keep all callstacks, overwrite old callstacks in favour of new ones
-  - Do not overwrite callstacks, only keep the first X callstacks
-- Profiling of distinct cycles  
+  - Only keep "slow" callstacks. This feature is super handy for finding realtime violation issues where the cycletime is exceeded.
+  - Only keep "fast" callstacks, which is useful for finding issues with the baseline of your PLC.
+  - Keep all callstacks, overwrite old callstacks in favour of new ones.
+  - Only keep the first X callstacks.
+- Profiling of distinct cycles.
 
-The core of the implementation was written way before TwinCAT offered any kind of profile mechanism, and I actually had the needs of a profile to find a serious problem in a PLC. Nowadays profiling for TwinCAT is offered by Beckhoff, but is of course attached with licencing fees and subpar visualization (my two cents). Twingrind instead uses a common fileformat for profiling and is free software. If you are interested to contribute to the project, feel free to write issues or fork the project and create pull requests. The current limitations of the profiler and the topics, which should be looked in, are as follows.
+The core of the implementation was written way before TwinCAT offered any kind of profile mechanism, and I actually had the needs of a profile to find a serious problem in a PLC. Nowadays profiling for TwinCAT is offered by Beckhoff, but is attached with licencing fees and is proprietary. Twingrind instead uses a common fileformat for profiling and is free software.
+
+**If you are interested to contribute to the project, feel free to write issues or fork the project and create pull requests. I also appreciante it if you [sponsor](https://github.com/sponsors/stefanbesler) me for creating and maintaining this project.**
+
+## Limitations
+
+The current limitations of the profiler and the topics, which should be looked in, are as follows.
 
 - [ ] Only PLCs that utilize exactly 1 task can be profiled.
 - [ ] Profiling itself adds some overhead to your code, which can not be avoided by this method, but maybe reduced by a fair bit.
 
-What follows is a short instruction how to use the code that is provided in this repository for profiling your PLC. 
 
-## Backup
-
-Before profiling you should backup your code by commiting it to your version-control system or at least copy & paste it to a different location. The script will modify your existing source code and although it has been tested thoroughly, it is always better to err on the side of caution.
-
-## Install
+## Installation
 
 Twingrind can either be downloaded from Github as or you can clone the [repository](https://github.com/stefanbesler/twingrind) and compile the library yourself. This guide will focus on the former use case.
 
-First, [get the latest release](https://github.com/stefanbesler/twingrind/releases) of the Twingrind, the download will give you a file called "twingrind_0.2.1.0.compiled-library" and a python setup file. Note that the version number may differ from the file you actually downloaded. 
+First, [get the latest release](https://github.com/stefanbesler/twingrind/releases) of the Twingrind, the download will give you a file called "twingrind_0.3.0.0.compiled-library" and a python setup file. Note that the version number may differ from the file you actually downloaded. 
 
 ### Twingrind PLC library
 
@@ -57,16 +59,23 @@ To make the Twingrind library available to the PLC, open the solution, which con
 
 ### pytwingrind python-module
 
-Open a command prompt and navigate to the *pytwingrind-0.2.1-py3-none-any.whl* file. Then use the following command to install the python module on your system.
+Open a command prompt and navigate to the *pytwingrind-0.3.0-py3-none-any.whl* file. Then use the following command to install the python module on your system.
 Make sure that your python environment is reachable in your path variable.
 
 ```
-pip install pytwingrind-0.2.1-py3-none-any.whl
+pip install pytwingrind-0.3.0-py3-none-any.whl
 ```
 
 After running the command successfully, the executable `twingrind.exe` should be available in your path.
 
 ## Preparation
+
+
+### Backup your source code
+
+Before profiling you should backup your code by commiting it to your version-control system or at least copy & paste it to a different location. The script will modify your existing source code and although it has been tested thoroughly, it is always better to err on the side of caution.
+
+### Prepare your source code
 
 Most of the profiling boilerplate code is generated by the Twingrind command *prepare*. However, a call to Twingrind.Profiler() has
 to be manually inserted as the **first line** of the **first PLC** in your task.
@@ -83,24 +92,24 @@ MAIN.PRG
 .
 ```
 
-The PRG *Profiler* has inputs to control the profiler, we will later add it to the watch window to control it. The methods *Push* and *Pop* are used for time measurements. Calling this method in the implementation of your main program is mandatory. After added the 3 lines of code, as shown above, use `twingrind.exe prepare` to add similar code section to all methods of your PLC.
+The PRG *Profiler* has inputs to control the profiler, we will later add it to the watch window to control it. After added this 1 line of code, as shown above, use `twingrind.exe prepare` in the folder where your plcproj file is located, to add similar code to additional boilerplate code to your PLC.
 
 ```
 twingrind prepare -d <PATH_TO_FOLDER_CONTAINING_PLCPROJ> -m <PATH_TO_HASHMAP_FILE>
 ```
 
-The command transverses through the entire code base located at the given directory. For all methods it adds a similar call 
-to the profiler in the header and the footer. The method calls are identified by id's and can be converted to readable 
-strings by a hashmap file, which is the output of *prepare.py*. The file that is generated by this call is needed 
-subsequently in *reconstruct*.
+The command transverses through the entire code base located at the given directory. For all calls it adds `Profiler.Push` and `Profiler.Pop` calls. The method calls are identified by id's and can be converted to readable 
+strings by a hashmap file, which is the output of `twingrind prepare`. The file that is generated by this call is needed subsequently in *reconstruct*.
+
+If you are using PLC libraries you can reuse the hashmap file and enabling profiling for your libraries as well by a similar call to `twingrind prepare`.
 
 **Please make sure to use a directory containing your PLC**
 
-## Using Twingrind
+## Usage
 
 ### Activate
 
-You can now activate your PLC on your target and work as you are used to. Note that the Profiler adds some overhead to your code. making execution a bit slower. Usually you should not notice a big impact though. To start profiling navigate to your MAIN programm, right click on *Profiler* and `Add Watch`.
+You can now activate your PLC on your target and work as you are used to. Note that the Profiler adds some overhead to your code. making execution a bit slower. Usually you should not notice a big impact though. To start profiling, login to your PLC, navigate to your MAIN programm, right click on *Profiler* and `Add Watch`.
 
 <p align="center">
   <img src="images/add_watch.png" alt="Add Watch" height="200px"/>&emsp;
@@ -118,8 +127,7 @@ Then search for *Twingrind.Profiler* in the Watch panel and expand the node. You
 
 ### Process snapshot
 
-The *process* command is a shortcut for *fetch* and then *reconstruct* every snapshot that was captured. Usually this is the command
-that you want to work with.
+The *process* command reads all callstacks that have been recorded from the PLC and then reconstructs a callgrind file. Usually this is the command that you want to work with.
 
 ```
 twingrind process -m hashmap
@@ -129,14 +137,13 @@ Here `-m hashmap` refers to the hashmap that has been created for your PLC durin
 
 ### Optional: Only read out profiling data from the PLC
 
-Run the following command to read out all data from your PLC. Note that recording has to be disabled before calling this issue. Disable
-continous capturing by setting *CaptureContinuous=FALSE* in the watch window and then call
+Run the following command to only read out all data from your PLC.
 
 ```
 twingrind fetch
 ```
 
-to read all recorded frames from the PLC. The resulting data is the output of *fetch* and is stored in 
+to read all recorded frames from the PLC. Capturing of callstacks is temporarily disabled. The resulting data is the output of *fetch* and is stored in 
 the current directory. Latter files contain base64 encoded information about the callstack and can be 
 converted to the callgrind format by *reconstruct*. The *fetch* command per default connects to the local target 
 and with the PLC that is running on port 851. However, the command has several arguments to control its behavior, use
