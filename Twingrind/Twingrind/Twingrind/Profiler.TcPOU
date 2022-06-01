@@ -46,6 +46,9 @@ _captureOnceTrig(CLK:=CaptureOnce);
 _resetTrig(CLK:=Reset);
 _captureContinuousTrig(CLK:=CaptureContinuous);
 
+// Initialization get cycle time for all tasks. Report an
+// error if the PLC is using more than 1 task, because this is not
+// supported atm
 IF _taskIt < 1
 THEN
   IF TwinCAT_SystemInfoVarList._AppInfo.TaskCnt > SINT_TO_UDINT(MAX_TASKS)

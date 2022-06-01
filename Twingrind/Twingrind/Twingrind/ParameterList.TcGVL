@@ -3,8 +3,8 @@
   <GVL Name="ParameterList" Id="{1e8f260f-5e09-45f9-a5ed-a85e826c75c5}" ParameterList="True">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL CONSTANT
-  MAX_FRAMES : SINT := 10;  
-  MAX_STACKSIZE : DINT := 32000*10;
+  MAX_FRAMES : SINT := 10; //< Maximum number of callstacks that can be captured by the profiler. Note that CaptureMode controls how and if old frames are overwritten by the profiler
+  MAX_STACKSIZE : DINT := 32000*10; //< Storage buffer for calls within a cycle. Every call uses 2 entries. Adjust this value if you use loads of methods in your PLC
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>
