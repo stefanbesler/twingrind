@@ -18,7 +18,7 @@
     <Company>Stefan Besler</Company>
     <Released>false</Released>
     <Title>Twingrind</Title>
-    <ProjectVersion>0.3.0.0</ProjectVersion>
+    <ProjectVersion>0.3.1.0</ProjectVersion>
     <Author>Stefan Besler and Contributers</Author>
     <!--    <OutputType>Exe</OutputType>
     <RootNamespace>MyApplication</RootNamespace>
