@@ -7,10 +7,10 @@ import logging
 import pickle
 from pytwingrind import common
 
-def create_hash(fb, method, hashes):
+def create_hash(filepath, fb, method, hashes):
     increment = 0
     while True:
-        hstr = fb + "::" + method + str(increment)
+        hstr = filepath + "::" + fb + "::" + method + str(increment)
         h = hash(hstr) & 4294967295
         if h not in hashes:
             hashes[h] = (fb, method)
@@ -42,7 +42,7 @@ def add_guards(filepath, fb_name, hashes):
             function_name = m[1]
             body = m[4]
             old_body = body
-            hash = create_hash(fb_name, function_name, hashes)
+            hash = create_hash(filepath, fb_name, function_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
             body, i = re.subn(r'RETURN([\s]*?);',
@@ -71,7 +71,7 @@ def add_guards(filepath, fb_name, hashes):
             prg_name = m[1]
             body = m[4]
             old_body = body
-            hash = create_hash(fb_name, prg_name, hashes)
+            hash = create_hash(filepath, fb_name, prg_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
             body, i = re.subn(r'RETURN([\s]*?);',
@@ -100,7 +100,7 @@ def add_guards(filepath, fb_name, hashes):
             functionblock_name = m[1]
             body = m[4]
             old_body = body
-            hash = create_hash(fb_name, functionblock_name, hashes)
+            hash = create_hash(filepath, fb_name, functionblock_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
             body, i = re.subn(r'RETURN([\s]*?);',
@@ -132,7 +132,7 @@ def add_guards(filepath, fb_name, hashes):
             method_name = m[1]
             body = m[3]
             old_body = body
-            hash = create_hash(fb_name, method_name, hashes)
+            hash = create_hash(filepath, fb_name, method_name, hashes)
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
             body, i = re.subn(r'RETURN([\s]*?);',

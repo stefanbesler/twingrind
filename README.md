@@ -18,7 +18,7 @@ The following image shows a visualization of the callstack of a single PLC cycle
 
 - Profiling for TwinCAT PLCs with free software.
 - Selective capturing of callstacks. Threshold can be used to adjust which callstacks should be stored by the profiler.
-- Continous profiling with the following modes
+- Continuous profiling with the following modes
   - Only keep "slow" callstacks. This feature is super handy for finding realtime violation issues where the cycletime is exceeded.
   - Only keep "fast" callstacks, which is useful for finding issues with the baseline of your PLC.
   - Keep all callstacks, overwrite old callstacks in favour of new ones.
@@ -41,7 +41,7 @@ The current limitations of the profiler and the topics, which should be looked i
 
 Twingrind can either be downloaded from Github as or you can clone the [repository](https://github.com/stefanbesler/twingrind) and compile the library yourself. This guide will focus on the former use case.
 
-First, [get the latest release](https://github.com/stefanbesler/twingrind/releases) of the Twingrind, the download will give you a file called "twingrind_0.3.0.0.compiled-library" and a python setup file. Note that the version number may differ from the file you actually downloaded. 
+First, [get the latest release](https://github.com/stefanbesler/twingrind/releases) of Twingrind, the download will give you a file called "twingrind_0.3.0.0.compiled-library" and a python setup file. Note that the version number may differ from the file you actually downloaded. 
 
 ### Twingrind PLC library
 
@@ -53,7 +53,7 @@ Start the TwinCAT XAE Shell or the Visual Studio Version you are usually using t
   <img src="images/add_library.png" alt="Add library" height="200px"/>
 </p>
 
-In the library-repository dialog, click on **Install** and navigate to the file compiled-library file and select it. Then, click on **Open** to install the struckig library into your TwinCAT environment, and you are ready to use it.
+In the library-repository dialog, click on **Install** and navigate to the file compiled-library file and select it. Then, click on **Open** to install the Twingrind-plc library into your TwinCAT environment, and you are ready to use it.
 
 To make the Twingrind library available to the PLC, open the solution, which contains the PLC you want to profile. In the solution explorer, expand the PLC you are interested in and right-click on **References**. Select **Add library**. In the dialog, search for ***Twingrind***, then select the item and click on **Ok**
 
@@ -159,11 +159,11 @@ python reconstruct -m <HASHMAPFILE> -c <CALLSTACK>
 ```
 
 Creates a callgrind file in the current directory. This script uses a previously generated hashmap (output of *prepare*) together with a recorded callstack (output of *fetch*). 
-Run the reconstruct command for all frames that were exported by *fetch. 
+Run the reconstruct command for all frames that were exported by *fetch*. 
 You may then open [qcachegrind](http://kcachegrind.sourceforge.net/html/Home.html) to visualize the callstack of your 
 captured cycles. The command comes with some arguments to control its behavior, for details refer to `twingrind reconstruct -h`
 
-In the images below the first one shows the overview over a complete cycle. The PLC that I was running when taking this picture didn't us a lot of cpu ticks that is why there is a lot of empty space in *CYCLE::CYCLE*. The second image is zoomed into the MAIN PRG.
+In the images below the first one shows the overview over a complete cycle. The PLC that I was running when taking this picture didn't use a lot of cpu ticks that is why there is a lot of empty space in *CYCLE::CYCLE*. The second image is zoomed into the MAIN PRG.
 
 <p align="center">
   <img src="images/demo3.png" alt="Callgrind demo" height="200px"/>&emsp;
