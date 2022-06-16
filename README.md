@@ -27,7 +27,7 @@ The following image shows a visualization of the callstack of a single PLC cycle
 
 The core of the implementation was written way before TwinCAT offered any kind of profile mechanism, and I actually had the needs of a profile to find a serious problem in a PLC. Nowadays profiling for TwinCAT is offered by Beckhoff, but is attached with licencing fees and is proprietary. Twingrind instead uses a common fileformat for profiling and is free software.
 
-**If you are interested to contribute to the project, feel free to write issues or fork the project and create pull requests. I also appreciante it if you [sponsor](https://github.com/sponsors/stefanbesler) me for creating and maintaining this project.**
+**If you are interested to contribute to the project, feel free to write issues or fork the project and create pull requests. I also appreciate [sponsoring](https://github.com/sponsors/stefanbesler) me for creating and maintaining this project.**
 
 ## Limitations
 
