@@ -8,7 +8,7 @@ This project brings profiling to TwinCAT PLCs. The general idea of this project 
    - **fetch** previously recorded callstacks from the PLC and store it as binary data on our PC. This is not necessarily where the PLC is running.
    - **reconstruct** the recorded callstacks to callgrind (http://kcachegrind.sourceforge.net/html/CallgrindFormat.html) for visualization by [qcachegrind](http://kcachegrind.sourceforge.net/html/Home.html).
    
-The following image shows a visualization of the callstack of example given in the [struckig project](http://github.com/stefanbesler/struckig) for the PLC cycle where the trajectory of the example is calculated.
+The following image shows a visualization of the callstack of example given in the [struckig project](http://github.com/stefanbesler/struckig) for the PLC cycle where the trajectory of the example is calculated. For this example, twingrind profiling was added to the struckig library and also to a PLC, which uses struckig.
 
 <p align="center">
   <img src="images/demo_struckig1.png" alt="Callgrind demo" height="200px"/>
