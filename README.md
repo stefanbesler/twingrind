@@ -14,7 +14,7 @@ The following image shows a visualization of the callstack of example given in t
   <img src="images/demo_struckig1.png" alt="Callgrind demo" height="200px"/>
 </p>
 <p align="center">
-  <img src="images/demo_struckig.png" alt="Callgrind demo" height="200px"/>
+  <img src="images/demo_struckig.png" alt="Callgrind demo" height="400px"/>
 </p>
 
 ## Features
