@@ -19,6 +19,7 @@ fetch_parser.add_argument("-n", "--netid", help="AMS-NetId of the target machine
 fetch_parser.add_argument("-p", "--port", help="Port of the PLC", default=851, required=False)
 fetch_parser.add_argument("-d", "--directory", help="Output directory", default="./", required=False)
 fetch_parser.add_argument("-o", "--outputname", help="Outputname prefix for files that are generated", default="callstack", required=False)
+fetch_parser.add_argument("-s", "--symbol_prefix", help="Prefix for the symbols that are read with ADS, this is needed if the PLC is compiled with TC_SYM_WITH_NAMESPACE", default="", required=False)
 
 reconstruct_parser = ArgumentParser("""Converts a callstack, as it has been read of the fetch command together with the
 hashmap that has been created for the PLC with the prepare command, to the callgrind format.""")
@@ -36,6 +37,7 @@ process_parser.add_argument("-d", "--directory", help="Output directory", defaul
 process_parser.add_argument("-m", "--hashmap", help="Hashmap that is created with the prepare command", required=True)
 process_parser.add_argument("-q", "--masquarade", help="Obfuscate names of functionblocks, functions and methods", action="store_true", required=False) 
 process_parser.add_argument("-o", "--outputname", help="Outputname prefix for files that are generated", default="callstack", required=False)
+process_parser.add_argument("-s", "--symbol_prefix", help="Prefix for the symbols that are read with ADS, this is needed if the PLC is compiled with TC_SYM_WITH_NAMESPACE", default="", required=False)
 
 clean_parser = ArgumentParser("""Removes all boilerplate code that has been added the PLC with the prepare command.
 Use this command if profiling is no longer needed.
@@ -58,7 +60,7 @@ def main():
   elif arg == "fetch":
     parser = fetch_parser
     args = vars(parser.parse_args(sys.argv[2::]))
-    pytwingrind.fetch.run(args["netid"], int(args["port"]), args["directory"], args["outputname"])
+    pytwingrind.fetch.run(args["netid"], int(args["port"]), args["directory"], args["outputname"], args["symbol_prefix"])
 
   elif arg == "reconstruct":
     parser = reconstruct_parser
@@ -68,7 +70,7 @@ def main():
   elif arg == "process":
     parser = process_parser
     args = vars(parser.parse_args(sys.argv[2::]))
-    callstacks = pytwingrind.fetch.run(args["netid"], int(args["port"]), args["directory"], args["outputname"])
+    callstacks = pytwingrind.fetch.run(args["netid"], int(args["port"]), args["directory"], args["outputname"], args["symbol_prefix"])
     
     for callstack in callstacks:
       pytwingrind.reconstruct.run(args["hashmap"], callstack, args["directory"], "")
