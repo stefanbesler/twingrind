@@ -20,6 +20,8 @@ fetch_parser.add_argument("-p", "--port", help="Port of the PLC", default=851, r
 fetch_parser.add_argument("-d", "--directory", help="Output directory", default="./", required=False)
 fetch_parser.add_argument("-o", "--outputname", help="Outputname prefix for files that are generated", default="callstack", required=False)
 fetch_parser.add_argument("-N", "--namespace", help="Namespace that is used for the Twingrind library, useful if used with TC_SYM_WITH_NAMESPACE", default="Twingrind", required=False)
+fetch_parser.add_argument("-r", "--reset", help="Reset the profiler, this action is taken before taken new shots using the shots argument", action='store_true')
+fetch_parser.add_argument("-s", "--shots", help="How many single shots should be taken when calling the fetch command", default=0, required=False, type=int)
 
 reconstruct_parser = ArgumentParser("""Converts a callstack, as it has been read of the fetch command together with the
 hashmap that has been created for the PLC with the prepare command, to the callgrind format.""")
@@ -38,6 +40,8 @@ process_parser.add_argument("-m", "--hashmap", help="Hashmap that is created wit
 process_parser.add_argument("-q", "--masquarade", help="Obfuscate names of functionblocks, functions and methods", action="store_true", required=False) 
 process_parser.add_argument("-o", "--outputname", help="Outputname prefix for files that are generated", default="callstack", required=False)
 process_parser.add_argument("-N", "--namespace", help="Namespace that is used for the Twingrind library, useful if used with TC_SYM_WITH_NAMESPACE", default="Twingrind", required=False)
+process_parser.add_argument("-r", "--reset", help="Reset the profiler, this action is taken before taken new shots using the shots argument", action='store_true')
+process_parser.add_argument("-s", "--shots", help="How many single shots should be taken when calling the fetch command", default=0, required=False, type=int)
 
 clean_parser = ArgumentParser("""Removes all boilerplate code that has been added the PLC with the prepare command.
 Use this command if profiling is no longer needed.
@@ -60,7 +64,7 @@ def main():
   elif arg == "fetch":
     parser = fetch_parser
     args = vars(parser.parse_args(sys.argv[2::]))
-    pytwingrind.fetch.run(args["netid"], int(args["port"]), args["directory"], args["outputname"], args["namespace"])
+    pytwingrind.fetch.run(args["netid"], int(args["port"]), args["directory"], args["outputname"], args["namespace"], args["reset"], args["shots"])
 
   elif arg == "reconstruct":
     parser = reconstruct_parser
@@ -70,7 +74,7 @@ def main():
   elif arg == "process":
     parser = process_parser
     args = vars(parser.parse_args(sys.argv[2::]))
-    callstacks = pytwingrind.fetch.run(args["netid"], int(args["port"]), args["directory"], args["outputname"], args["namespace"])
+    callstacks = pytwingrind.fetch.run(args["netid"], int(args["port"]), args["directory"], args["outputname"], args["namespace"], args["reset"], args["shots"])
     
     for callstack in callstacks:
       pytwingrind.reconstruct.run(args["hashmap"], callstack, args["directory"], "")

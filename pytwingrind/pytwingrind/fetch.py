@@ -6,7 +6,13 @@ import pickle
 import ctypes
 from pytwingrind import common
 
-def run(netid: str, port: int, directory: str, outputname: str, namespace: str):
+def trigger_edge(plc, symbol: str, pause_duration: float):
+  plc.write_by_name(symbol, True, pyads.PLCTYPE_BOOL)
+  time.sleep(pause_duration)
+  plc.write_by_name(symbol, False, pyads.PLCTYPE_BOOL)
+  time.sleep(pause_duration)  
+
+def run(netid: str, port: int, directory: str, outputname: str, namespace: str, reset: bool, shots: int):
   profiler_symbolname = "Profiler"
   parameterlist_symbolname = "ParameterList"
   
@@ -22,10 +28,11 @@ def run(netid: str, port: int, directory: str, outputname: str, namespace: str):
   try:
     plc.open()
     
-    for i in range(0, 1):
+    for i in range(0, 2):
+      logging.debug(f"Trying to connect to profiler at {profiler_symbolname}")
       try:
         plc.read_by_name(f"{profiler_symbolname}.CaptureContinuous", pyads.PLCTYPE_BOOL)
-      except pyads.ADSError as e:
+      except Exception as e:
         if i == 0:
           profiler_symbolname = ".".join(filter(None, [namespace, "Profiler"]))
           parameterlist_symbolname = ".".join(filter(None, [namespace, "ParameterList"]))
@@ -43,8 +50,28 @@ def run(netid: str, port: int, directory: str, outputname: str, namespace: str):
           
     # stop capturing
     if is_capturing:
+      plc.write_by_name(f"{profiler_symbolname}.CaptureOnce", False, pyads.PLCTYPE_BOOL)
       logging.info(f"Capturing paused")
       
+    # optionally reset previously taken frames
+    if reset:  
+      logging.debug(f"Resetting profiler")
+      trigger_edge(plc, f"{profiler_symbolname}.Reset", pause_duration)
+        
+    # optionally capture some frames
+    if shots > 0:
+      logging.debug(f"Temporarily configuring profiler for taking singleshots")
+      plc.write_by_name(f"{profiler_symbolname}.Mode", 0, pyads.PLCTYPE_INT)
+      plc.write_by_name(f"{profiler_symbolname}.CaptureCpuTimeLowThreshold", 0, pyads.PLCTYPE_LREAL)
+      plc.write_by_name(f"{profiler_symbolname}.CaptureCpuTimeHighThreshold", 0, pyads.PLCTYPE_LREAL)
+      
+      for i in range(shots):
+        logging.info(f"Taking snapshot {i+1}/{shots}")
+        trigger_edge(plc, f"{profiler_symbolname}.CaptureOnce", pause_duration)        
+
+    time.sleep(pause_duration);
+    
+    # read all the data that the profile already captured
     max_stacksize = plc.read_by_name(f"{parameterlist_symbolname}.MAX_STACKSIZE", pyads.PLCTYPE_DINT)
     max_frames = plc.read_by_name(f"{parameterlist_symbolname}.MAX_FRAMES", pyads.PLCTYPE_SINT)  
     frameIndex = plc.read_by_name(f"{profiler_symbolname}.FrameIndex", pyads.PLCTYPE_BYTE)
@@ -77,6 +104,10 @@ def run(netid: str, port: int, directory: str, outputname: str, namespace: str):
     logging.error(e)
   finally:
     try:
+      logging.debug(f"Reconfiguring profiler to initial setup")
+      plc.write_by_name(f"{profiler_symbolname}.Mode", capturing_mode, pyads.PLCTYPE_INT)
+      plc.write_by_name(f"{profiler_symbolname}.CaptureCpuTimeLowThreshold", low_threshold, pyads.PLCTYPE_LREAL)
+      plc.write_by_name(f"{profiler_symbolname}.CaptureCpuTimeHighThreshold", high_threshold, pyads.PLCTYPE_LREAL) 
       plc.write_by_name(f"{profiler_symbolname}.CaptureContinuous", is_capturing, pyads.PLCTYPE_BOOL)        
     except:
       pass
