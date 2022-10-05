@@ -6,8 +6,8 @@ import ctypes
 from pytwingrind import common
 
 def run(netid: str, port: int, directory: str, outputname: str, symbol_prefix: str):
-  profiler_symbolname = "."join(symbol_prefix, "Profiler")
-  parameterlist_symbolname = "."join(symbol_prefix, "ParameterList")
+  profiler_symbolname = ".".join(filter(None, [symbol_prefix, "Profiler"]))
+  parameterlist_symbolname = ".".join(filter(None, [symbol_prefix, "ParameterList"]))
   
   callstacks = []
   is_capturing = False
