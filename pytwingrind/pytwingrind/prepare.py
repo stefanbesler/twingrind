@@ -34,6 +34,10 @@ def add_guards(filepath, fb_name, hashes):
 
     nearly = 0
     ncallables = 0
+
+    if '<SFC>' in src:
+        logging.warning("Implementation is SFC in {}, skipping".format(fb_name))
+        return
     
     # add guards to functions
     functions = re.findall(r'<POU(.*?)Name="(.*?)"(.*?)FUNCTION (.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
