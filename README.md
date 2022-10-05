@@ -136,7 +136,11 @@ The *process* command reads all callstacks that have been recorded from the PLC 
 twingrind process -m hashmap
 ```
 
-Here `-m hashmap` refers to the hashmap that has been created for your PLC during preparation. Use `twingrind process -h` for a detailed listing of all arguments.
+Here `-m hashmap` refers to the hashmap that has been created for your PLC during preparation. Use `twingrind process -h` for a detailed listing of all arguments. Use the following command to delete any previously recorded data (`-r` argument), take the profile of a single cycle (`-s1` argument).
+
+```
+twingrind process -m hashmap -rs1
+```
 
 ### Optional: Only read out profiling data from the PLC
 
