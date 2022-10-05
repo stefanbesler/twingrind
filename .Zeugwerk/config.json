@@ -6,7 +6,7 @@
       "name": "Twingrind",
       "plcs": [
         {
-          "version": "0.3.1.0",
+          "version": "0.4.0.0",
           "name": "Twingrind",
           "type": "Library",
           "frameworks": {},
