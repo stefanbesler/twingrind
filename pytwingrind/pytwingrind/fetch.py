@@ -49,10 +49,11 @@ def run(netid: str, port: int, directory: str, outputname: str, namespace: str, 
     pause_duration = 5 * max_cycletime_in_s
           
     # stop capturing
+    plc.write_by_name(f"{profiler_symbolname}.CaptureOnce", False, pyads.PLCTYPE_BOOL)    
     if is_capturing:
-      plc.write_by_name(f"{profiler_symbolname}.CaptureOnce", False, pyads.PLCTYPE_BOOL)
+      plc.write_by_name(f"{profiler_symbolname}.CaptureContinuous", False, pyads.PLCTYPE_BOOL)      
       logging.info(f"Capturing paused")
-      
+
     # optionally reset previously taken frames
     if reset:  
       logging.debug(f"Resetting profiler")
@@ -64,7 +65,8 @@ def run(netid: str, port: int, directory: str, outputname: str, namespace: str, 
       plc.write_by_name(f"{profiler_symbolname}.Mode", 0, pyads.PLCTYPE_INT)
       plc.write_by_name(f"{profiler_symbolname}.CaptureCpuTimeLowThreshold", 0, pyads.PLCTYPE_LREAL)
       plc.write_by_name(f"{profiler_symbolname}.CaptureCpuTimeHighThreshold", 0, pyads.PLCTYPE_LREAL)
-      
+      time.sleep(pause_duration);
+     
       for i in range(shots):
         logging.info(f"Taking snapshot {i+1}/{shots}")
         trigger_edge(plc, f"{profiler_symbolname}.CaptureOnce", pause_duration)        
