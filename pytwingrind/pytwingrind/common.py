@@ -2,7 +2,22 @@ import ctypes
 import chardet
 import os
 import re
+from dataclasses import dataclass
+
 profiler_tag = r"(* @@ PROFILER @@ *)"
+
+@dataclass
+class GuardExclusionToken:
+    token: str
+    description: str
+
+file_skip_tokens = [
+    GuardExclusionToken(profiler_tag, "Guards already present"),
+    GuardExclusionToken('<SFC>', "Sequential function chart detected (SFC)"),
+    GuardExclusionToken('<NWL>', "Ladder Logic Diagram detected (LD)"),
+    GuardExclusionToken('<CFC', "Continuous Function Chart detected (CFC)"),
+    GuardExclusionToken('<StateChart>', "Sequential function chart detected (SC)"),
+    ]
 
 def detect_encoding(filepath : str):
   

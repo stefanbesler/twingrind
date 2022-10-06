@@ -38,6 +38,9 @@ The current limitations of the profiler and the topics, which should be looked i
 
 - [ ] Only PLCs that utilize exactly 1 task can be profiled.
 - [ ] Profiling itself adds some overhead to your code, which can not be avoided by this method, but maybe reduced by a fair bit.
+- [ ] Files containing non-ST code are skipped. Profiling function blocks **with mixed implementations** (ST and any other IEC 61131-3 language like
+      SFC, CFC) is not supported.
+- [ ] Twingrind focuses on Structured Text (ST), profiling for other languages specified by IEC 61131-3 is not supported.
 
 
 ## Installation

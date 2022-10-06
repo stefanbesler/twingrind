@@ -25,19 +25,19 @@ def add_guards(filepath, fb_name, hashes):
     try:
         with open(filepath, "rt", encoding=common.detect_encoding(filepath)) as f:
             src = f.read()
-            if common.profiler_tag in src:
-                logging.warning("Profiler guards seem already present in {}, skipping".format(fb_name))
-                return
+            
+            # check if the file should not be guarded due to some token
+            for t in common.file_skip_tokens:
+                if t.token in src:
+                    logging.warning(f"Skipping {filepath}, {t.description}")
+                    return
+                
     except UnicodeDecodeError as ex:
         print('File {} contains invalid characters, only ascii is supported'.format(filepath))
         raise ex
 
     nearly = 0
     ncallables = 0
-
-    if '<SFC>' in src:
-        logging.warning("Implementation is SFC in {}, skipping".format(fb_name))
-        return
     
     # add guards to functions
     functions = re.findall(r'<POU(.*?)Name="(.*?)"(.*?)FUNCTION (.*?)<ST><!\[CDATA\[(.*?)\]\]><\/ST>', src, re.S | re.M | re.UNICODE)
