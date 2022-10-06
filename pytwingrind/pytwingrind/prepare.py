@@ -50,7 +50,7 @@ def add_guards(filepath, fb_name, hashes):
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
             body, i = re.subn(r'RETURN([\s]*?);',
-                              r'''\1{tag}Twingrind.Profiler.Pop({hash}); {tag}\1RETURN;'''.format(hash=hash, tag=common.profiler_tag),
+                              r'''\1{tag}Twingrind.Profiler.Pop({hash});{tag}\1RETURN;'''.format(hash=hash, tag=common.profiler_tag),
                               body, 0, re.S | re.M | re.UNICODE)
             body = body + '''\n{tag}Twingrind.Profiler.Pop({hash});{tag}'''.format(hash=hash, tag=common.profiler_tag)
 
@@ -79,7 +79,7 @@ def add_guards(filepath, fb_name, hashes):
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
             body, i = re.subn(r'RETURN([\s]*?);',
-                              r'''\1{tag}Twingrind.Profiler.Pop({hash}); {tag}\1RETURN;'''.format(hash=hash, tag=common.profiler_tag),
+                              r'''\1{tag}Twingrind.Profiler.Pop({hash});{tag}\1RETURN;'''.format(hash=hash, tag=common.profiler_tag),
                               body, 0, re.S | re.M | re.UNICODE)
             body = body + '''\n{tag}Twingrind.Profiler.Pop({hash});{tag}'''.format(hash=hash, tag=common.profiler_tag)
 
@@ -108,7 +108,7 @@ def add_guards(filepath, fb_name, hashes):
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
             body, i = re.subn(r'RETURN([\s]*?);',
-                              r'''\1{tag}Twingrind.Profiler.Pop({hash}); {tag}RETURN\1;'''.format(hash=hash, tag=common.profiler_tag),
+                              r'''\1{tag}Twingrind.Profiler.Pop({hash});{tag}RETURN\1;'''.format(hash=hash, tag=common.profiler_tag),
                               body, 0, re.S | re.M | re.UNICODE)
             body = body + '''\n{tag}Twingrind.Profiler.Pop({hash});{tag}'''.format(hash=hash, tag=common.profiler_tag)
 
@@ -140,7 +140,7 @@ def add_guards(filepath, fb_name, hashes):
 
             body = '''{tag}Twingrind.Profiler.Push({hash});{tag}\n'''.format(hash=hash, tag=common.profiler_tag) + body
             body, i = re.subn(r'RETURN([\s]*?);',
-                              r'''\1{tag}Twingrind.Profiler.Pop({hash}); {tag}\1RETURN;'''.format(hash=hash, tag=common.profiler_tag),
+                              r'''\1{tag}Twingrind.Profiler.Pop({hash});{tag}\1RETURN;'''.format(hash=hash, tag=common.profiler_tag),
                               body, 0, re.S | re.M | re.UNICODE)
             body = body + '''\n{tag}Twingrind.Profiler.Pop({hash});{tag}'''.format(hash=hash, tag=common.profiler_tag)
 
@@ -158,7 +158,7 @@ def add_guards(filepath, fb_name, hashes):
                                                                                           body=body,
                                                                                           fb=fb_name))
 
-    logging.debug("{}: guards added in {} methods, contains ({} returns)".format(fb_name, ncallables, nearly+1))
+    logging.debug("{}: added {} guards and covered {} paths".format(fb_name, ncallables, nearly+1))
 
     with open(filepath, "wt", encoding=common.detect_encoding(filepath)) as g:
         g.write(src)
