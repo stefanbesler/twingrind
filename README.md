@@ -47,7 +47,9 @@ The current limitations of the profiler and the topics, which should be looked i
 
 Twingrind can either be downloaded from Github as or you can clone the [repository](https://github.com/stefanbesler/twingrind) and compile the library yourself. This guide will focus on the former use case.
 
-First, [get the latest release](https://github.com/stefanbesler/twingrind/releases) of Twingrind, the download will give you a file called "twingrind_0.4.0.0.compiled-library" and a python setup file. Note that the version number may differ from the file you actually downloaded. 
+First, [get the latest release](https://github.com/stefanbesler/twingrind/releases) of Twingrind, the download will give you a file called "twingrind_0.4.0.0.compiled-library" and a python setup file. Note that the version number may differ from the file you actually downloaded.
+
+The PLC library can also be installed and updated with [Twinpack, which is a Package Manager for TwinCAT](https://github.com/Zeugwerk/Twinpack).
 
 ### Twingrind PLC library
 
