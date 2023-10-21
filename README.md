@@ -167,7 +167,7 @@ and with the PLC that is running on port 851. However, the command has several a
 Use the following command to reconstruct a frame.
 
 ```
-python reconstruct -m <HASHMAPFILE> -c <CALLSTACK>
+twingrind reconstruct -m <HASHMAPFILE> -c <CALLSTACK>
 ```
 
 Creates a callgrind file in the current directory. This script uses a previously generated hashmap (output of *prepare*) together with a recorded callstack (output of *fetch*). 
