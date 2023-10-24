@@ -44,7 +44,7 @@ def build_graph(network, hashmap, roots, data, sid=-1, eid=-1):
     endid = np.where(np.logical_and(data[sid+1:eid, StackRow.HASH] == data[sid, StackRow.HASH],
                      data[sid+1:eid, StackRow.DEPTH] == data[sid, StackRow.DEPTH]))[0][0] + sid + 1
     dt_100ns = data[endid, StackRow.END_100NS] - data[sid, StackRow.START_100NS]
-    fb, method = hashmap[data[endid, StackRow.HASH]]
+    fb, method = hashmap[data[endid, StackRow.HASH]] if hashmap is not None else (hex(data[endid, StackRow.HASH]), hex(data[endid, StackRow.HASH]))
     depth = int(data[endid, StackRow.DEPTH])+1
 
     roots = roots[0:depth]
@@ -126,7 +126,9 @@ def run(hashmap: str, file: str, dest: str, outputname: str):
     
     logging.debug(f"Callstack size={callstack.size}")
     
-    hm = pickle.load(open(hashmap, 'rb'))
+    hm = None
+    if hashmap is not None:
+        hm = pickle.load(open(hashmap, 'rb'))
 
     data = extract_stack(callstack.stack, hm)
     n = networkx.DiGraph()

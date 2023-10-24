@@ -24,7 +24,7 @@ fetch_parser.add_argument("-s", "--shots", help="How many single shots should be
 
 reconstruct_parser = ArgumentParser("""Converts a callstack, as it has been read of the fetch command together with the
 hashmap that has been created for the PLC with the prepare command, to the callgrind format.""")
-reconstruct_parser.add_argument("-m", "--hashmap", help="Hashmap that is created with the prepare command", required=True)
+reconstruct_parser.add_argument("-m", "--hashmap", help="Hashmap that is created with the prepare command", required=False)
 reconstruct_parser.add_argument("-c", "--callstack", help="Callstack that was read out with the fetch command", required=True)
 reconstruct_parser.add_argument("-d", "--directory", help="Output directory", default="./", required=False)
 reconstruct_parser.add_argument("-q", "--masquarade", help="Obfuscate names of functionblocks, functions and methods", action="store_true", required=False) 
