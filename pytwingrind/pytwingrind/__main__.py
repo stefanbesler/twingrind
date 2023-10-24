@@ -1,6 +1,5 @@
 import sys
 import logging
-import pytwingrind.prepare, pytwingrind.fetch, pytwingrind.reconstruct, pytwingrind.clean
 from argparse import ArgumentParser
 
 prepare_parser = ArgumentParser("""Prepares the source code of a PLC
@@ -30,6 +29,7 @@ reconstruct_parser.add_argument("-c", "--callstack", help="Callstack that was re
 reconstruct_parser.add_argument("-d", "--directory", help="Output directory", default="./", required=False)
 reconstruct_parser.add_argument("-q", "--masquarade", help="Obfuscate names of functionblocks, functions and methods", action="store_true", required=False) 
 reconstruct_parser.add_argument("-o", "--outputname", help="Outputname prefix for files that are generated", default="callstack", required=False)
+reconstruct_parser.add_argument("-R", "--recursion-limit", help="Set pythons maximum recursion limit", default=2000, required=False)
 
 process_parser = ArgumentParser("""Fetches all captures from the PLC and then reconstructs the call-graph. This command
 is the same as running fetch and then reconstructing every callstack""")
@@ -42,6 +42,7 @@ process_parser.add_argument("-o", "--outputname", help="Outputname prefix for fi
 process_parser.add_argument("-N", "--namespace", help="Namespace that is used for the Twingrind library, useful if used with TC_SYM_WITH_NAMESPACE", default="Twingrind", required=False)
 process_parser.add_argument("-r", "--reset", help="Reset the profiler, this action is taken before taken new shots using the shots argument", action='store_true')
 process_parser.add_argument("-s", "--shots", help="How many single shots should be taken when calling the fetch command", default=0, required=False, type=int)
+process_parser.add_argument("-R", "--recursion-limit", help="Set pythons maximum recursion limit", default=2000, required=False)
 
 clean_parser = ArgumentParser("""Removes all boilerplate code that has been added the PLC with the prepare command.
 Use this command if profiling is no longer needed.
@@ -57,29 +58,42 @@ def main():
     
   arg = sys.argv[1]
   if arg == "prepare":
+    import pytwingrind.prepare
+
     parser = prepare_parser
     args = vars(parser.parse_args(sys.argv[2::]))
     pytwingrind.prepare.run(args["directory"], args["hashmap"])
   
   elif arg == "fetch":
+    import pytwingrind.fetch
+
     parser = fetch_parser
     args = vars(parser.parse_args(sys.argv[2::]))
     pytwingrind.fetch.run(args["netid"], int(args["port"]), args["directory"], args["outputname"], args["namespace"], args["reset"], args["shots"])
 
   elif arg == "reconstruct":
+    import pytwingrind.reconstruct
+
     parser = reconstruct_parser
     args = vars(parser.parse_args(sys.argv[2::]))
+    sys.setrecursionlimit(int(args["recursion_limit"]))
     pytwingrind.reconstruct.run(args["hashmap"], args["callstack"], args["directory"], args["outputname"])
  
   elif arg == "process":
+    import pytwingrind.fetch
+    import pytwingrind.reconstruct
+
     parser = process_parser
     args = vars(parser.parse_args(sys.argv[2::]))
+    sys.setrecursionlimit(int(args["recursion_limit"]))
     callstacks = pytwingrind.fetch.run(args["netid"], int(args["port"]), args["directory"], args["outputname"], args["namespace"], args["reset"], args["shots"])
     
     for callstack in callstacks:
       pytwingrind.reconstruct.run(args["hashmap"], callstack, args["directory"], "")
     
   elif arg == "clean":
+    import pytwingrind.clean
+
     parser = clean_parser
     args = vars(parser.parse_args(sys.argv[2::]))
     pytwingrind.clean.run(args["directory"])
