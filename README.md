@@ -142,6 +142,7 @@ twingrind process -m hashmap
 ```
 
 Here `-m hashmap` refers to the hashmap that has been created for your PLC during preparation. Use `twingrind process -h` for a detailed listing of all arguments. Use the following command to delete any previously recorded data (`-r` argument), take the profile of a single cycle (`-s1` argument).
+If the command fails with an "RecursionError: maximum recursion depth exceeded" error, try to increase the recursion limit with the "--recursion-limit N" switch, the recursion limit defaults to 2000.
 
 ```
 twingrind process -m hashmap -rs1
@@ -176,6 +177,7 @@ You may then open [qcachegrind](http://kcachegrind.sourceforge.net/html/Home.htm
 captured cycles. The command comes with some arguments to control its behavior, for details refer to `twingrind reconstruct -h`
 
 In the images below the first one shows the overview over a complete cycle. The PLC that I was running when taking this picture didn't use a lot of cpu ticks that is why there is a lot of empty space in *CYCLE::CYCLE*. The second image is zoomed into the MAIN PRG.
+If the command fails with an "RecursionError: maximum recursion depth exceeded" error, try to increase the recursion limit with the "--recursion-limit N" switch, the recursion limit defaults to 2000.
 
 <p align="center">
   <img src="images/demo3.png" alt="Callgrind demo" height="200px"/>&emsp;
